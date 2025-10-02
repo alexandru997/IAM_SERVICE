@@ -18,7 +18,7 @@ public class Post {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created", nullable = false, updatable = false)
     private LocalDateTime create = LocalDateTime.now();
 
     @Column(nullable = false, columnDefinition = "integer default 0")
