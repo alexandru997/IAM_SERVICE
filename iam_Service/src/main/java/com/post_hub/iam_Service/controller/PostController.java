@@ -1,52 +1,33 @@
 package com.post_hub.iam_Service.controller;
 
-import com.post_hub.iam_Service.service.impl.PostServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import com.post_hub.iam_Service.model.constants.ApiErrorMessage;
+import com.post_hub.iam_Service.model.constants.ApiLogoMessage;
+import com.post_hub.iam_Service.model.enteties.Post;
+import com.post_hub.iam_Service.repositories.PostRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
-
+@Slf4j
 @RestController
-@RequestMapping( "/posts")
+@RequiredArgsConstructor
+@RequestMapping("${end.point.posts}")
 public class PostController {
-
-    private final PostServiceImpl postServiceImpl;
-
-    @Autowired
-    public PostController(PostServiceImpl postServiceImpl) {
-        this.postServiceImpl = postServiceImpl;
+    private final PostRepository postRepository;
+    @GetMapping("${end.point.id}")
+    public ResponseEntity<Post> getPostById(
+            @PathVariable(name = "id") Integer postId){
+        log.info(ApiLogoMessage.POST_INFO_BY_ID.getMessage(postId));
+        return postRepository.findById(postId)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> {
+                    log.info(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(postId));
+                    return ResponseEntity.notFound().build();
+                });
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<String> createPost(@RequestBody Map<String, Object> requestBody){
-        String title =  (String) requestBody.get("title");
-        String content = (String) requestBody.get("content");
-
-        String postContent =  "Title: " + title + "\nContent: " + content+ "\n";
-
-        postServiceImpl.CreatePost(postContent);
-
-        return  new ResponseEntity<>("Post created with title: " + title, HttpStatus.OK);
-    }
-
-    @GetMapping("/test")
-    public ResponseEntity<String> testEndpoint(){
-        return new ResponseEntity<>("API is working!", HttpStatus.OK);
-    }
-
-    @GetMapping("/create")
-    public ResponseEntity<String> createPostDemo(){
-        String title = "Demo Post";
-        String content = "This is a demo post created via GET request";
-        String postContent = "Title: " + title + "\nContent: " + content + "\n";
-        
-        postServiceImpl.CreatePost(postContent);
-        
-        return new ResponseEntity<>("Post created with title: " + title + " (via GET)", HttpStatus.OK);
-    }
 }
