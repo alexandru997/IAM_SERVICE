@@ -8,11 +8,11 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 
 public enum ApiLogoMessage {
-    POST_INFO_BY_ID("Receiving post with ID: %s");
+    POST_INFO_BY_ID("Receiving post with ID: {}"),
+    NAME_OF_CURRENT_METHOD("Current method: {}")
+    ;
     
-    private final String message;
+    private final String value;
     
-    public String getMessage(Object... args){
-        return String.format(message, args);
-    }
+
 }
