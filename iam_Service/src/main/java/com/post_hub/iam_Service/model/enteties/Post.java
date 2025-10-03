@@ -19,8 +19,22 @@ public class Post {
     private String title;
 
     @Column(name = "created", nullable = false, updatable = false)
-    private LocalDateTime create = LocalDateTime.now();
+    private LocalDateTime created;
 
-    @Column(nullable = false, columnDefinition = "integer default 0")
+
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
+
+    @Column(nullable = false)
+    private Integer likes;
+
+    @PrePersist
+    protected void onCreate() {
+        if (created == null) {
+            created = LocalDateTime.now();
+        }
+        if (likes == null) {
+            likes = 0;
+        }
+    }
 }
