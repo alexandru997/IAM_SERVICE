@@ -1,16 +1,14 @@
 package com.post_hub.iam_Service.controller;
 import com.post_hub.iam_Service.model.constants.ApiLogoMessage;
 import com.post_hub.iam_Service.model.dto.post.PostDTO;
+import com.post_hub.iam_Service.model.request.post.PostRequest;
 import com.post_hub.iam_Service.model.response.IamResponse;
 import com.post_hub.iam_Service.service.PostService;
 import com.post_hub.iam_Service.utils.APIUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -25,5 +23,14 @@ public class PostController {
        IamResponse<PostDTO> response = postService.getById(postId);
        return ResponseEntity.ok(response);
     }
+
+    @PostMapping("${end.points.create}")
+    public ResponseEntity<IamResponse<PostDTO>> createPost(
+            @RequestBody PostRequest postRequest){
+        log.trace(ApiLogoMessage.NAME_OF_CURRENT_METHOD.getValue(), APIUtils.getMethodName());
+        IamResponse<PostDTO> response = postService.createPost(postRequest);
+        return ResponseEntity.ok(response);
+    }
+
 
 }
