@@ -5,6 +5,7 @@ import com.post_hub.iam_Service.model.constants.ApiErrorMessage;
 import com.post_hub.iam_Service.model.dto.post.PostDTO;
 import com.post_hub.iam_Service.model.enteties.Post;
 import com.post_hub.iam_Service.model.exeption.NotFoundException;
+import com.post_hub.iam_Service.model.request.post.PostRequest;
 import com.post_hub.iam_Service.model.response.IamResponse;
 import com.post_hub.iam_Service.repositories.PostRepository;
 import com.post_hub.iam_Service.service.PostService;
@@ -23,5 +24,15 @@ public class PostServiceImpl implements PostService {
                .orElseThrow(() -> new NotFoundException(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(postId)));
        PostDTO postDTO = postMapper.toPostDTO(post) ;
        return IamResponse.createSuccessful(postDTO);
+    }
+
+    @Override
+    public IamResponse<PostDTO> createPost(@NotNull PostRequest postRequest) {
+        Post post =  postMapper.createPost(postRequest);
+
+        Post savedPost = postRepository.save(post);
+        PostDTO postDTO = postMapper.toPostDTO(savedPost);
+        return IamResponse.createSuccessful(postDTO);
+
     }
 }
