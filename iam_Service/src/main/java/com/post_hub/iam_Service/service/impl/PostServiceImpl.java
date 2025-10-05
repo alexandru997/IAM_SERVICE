@@ -7,12 +7,15 @@ import com.post_hub.iam_Service.model.enteties.Post;
 import com.post_hub.iam_Service.model.exeption.DataExistException;
 import com.post_hub.iam_Service.model.exeption.NotFoundException;
 import com.post_hub.iam_Service.model.request.post.PostRequest;
+import com.post_hub.iam_Service.model.request.post.UpdatePostRequest;
 import com.post_hub.iam_Service.model.response.IamResponse;
 import com.post_hub.iam_Service.repositories.PostRepository;
 import com.post_hub.iam_Service.service.PostService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -39,5 +42,17 @@ public class PostServiceImpl implements PostService {
         PostDTO postDTO = postMapper.toPostDTO(savedPost);
         return IamResponse.createSuccessful(postDTO);
 
+    }
+
+    @Override
+    public IamResponse<PostDTO> updatePost(@NotNull Integer postId, @NotNull UpdatePostRequest postRequest) {
+        Post post =  postRepository.findById(postId)
+                .orElseThrow(() -> new NotFoundException(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(postId)));
+
+        postMapper.updatePost(post, postRequest);
+        post.setUpdated(LocalDateTime.now());
+        post = postRepository.save(post);
+        PostDTO postDTO = postMapper.toPostDTO(post);
+        return IamResponse.createSuccessful(postDTO);
     }
 }
