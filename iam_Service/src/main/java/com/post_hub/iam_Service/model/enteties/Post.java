@@ -18,23 +18,16 @@ public class Post {
     @Column(nullable = false)
     private String title;
 
-    @Column(name = "created", nullable = false, updatable = false)
-    private LocalDateTime created;
-
-
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column( nullable = false, length = 500)
     private String content;
 
-    @Column(nullable = false)
-    private Integer likes;
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime created = LocalDateTime.now();
 
-    @PrePersist
-    protected void onCreate() {
-        if (created == null) {
-            created = LocalDateTime.now();
-        }
-        if (likes == null) {
-            likes = 0;
-        }
-    }
+    @Column(nullable = false)
+    private LocalDateTime updated = LocalDateTime.now();
+
+    @Column(nullable = false, columnDefinition = "integer default 0")
+    private Integer likes = 0;
+
 }

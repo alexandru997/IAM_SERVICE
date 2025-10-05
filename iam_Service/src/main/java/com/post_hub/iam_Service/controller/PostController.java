@@ -2,6 +2,7 @@ package com.post_hub.iam_Service.controller;
 import com.post_hub.iam_Service.model.constants.ApiLogoMessage;
 import com.post_hub.iam_Service.model.dto.post.PostDTO;
 import com.post_hub.iam_Service.model.request.post.PostRequest;
+import com.post_hub.iam_Service.model.request.post.UpdatePostRequest;
 import com.post_hub.iam_Service.model.response.IamResponse;
 import com.post_hub.iam_Service.service.PostService;
 import com.post_hub.iam_Service.utils.APIUtils;
@@ -33,5 +34,13 @@ public class PostController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("${end.point.id}")
+    public ResponseEntity<IamResponse<PostDTO>> updatePost(
+            @PathVariable(name = "id") Integer postId,
+            @RequestBody @Valid UpdatePostRequest updatePostRequest){
+        log.trace(ApiLogoMessage.NAME_OF_CURRENT_METHOD.getValue(), APIUtils.getMethodName());
+        IamResponse<PostDTO> response = postService.updatePost(postId, updatePostRequest);
+        return ResponseEntity.ok(response);
+    }
 
 }
