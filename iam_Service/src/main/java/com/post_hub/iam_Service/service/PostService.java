@@ -14,4 +14,6 @@ public interface PostService {
 
     IamResponse<PostDTO> updatePost(@NotNull Integer postId,  @NotNull UpdatePostRequest postRequest);
 
+    void softDeletePost(@NotNull Integer postId);
+
 }
