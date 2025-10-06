@@ -1,8 +1,10 @@
 package com.post_hub.iam_Service.controller;
+
 import com.post_hub.iam_Service.model.constants.ApiLogoMessage;
 import com.post_hub.iam_Service.model.dto.post.PostDTO;
 import com.post_hub.iam_Service.model.dto.post.PostSearchDTO;
 import com.post_hub.iam_Service.model.request.post.PostRequest;
+import com.post_hub.iam_Service.model.request.post.PostSearchRequest;
 import com.post_hub.iam_Service.model.request.post.UpdatePostRequest;
 import com.post_hub.iam_Service.model.response.IamResponse;
 import com.post_hub.iam_Service.model.response.PaginationResponse;
@@ -23,17 +25,18 @@ import org.springframework.data.domain.Pageable;
 @RequestMapping("${end.point.posts}")
 public class PostController {
     private final PostService postService;
+
     @GetMapping("${end.point.id}")
     public ResponseEntity<IamResponse<PostDTO>> getPostById(
-            @PathVariable(name = "id") Integer postId){
+            @PathVariable(name = "id") Integer postId) {
         log.trace(ApiLogoMessage.NAME_OF_CURRENT_METHOD.getValue(), APIUtils.getMethodName());
-       IamResponse<PostDTO> response = postService.getById(postId);
-       return ResponseEntity.ok(response);
+        IamResponse<PostDTO> response = postService.getById(postId);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("${end.points.create}")
     public ResponseEntity<IamResponse<PostDTO>> createPost(
-            @RequestBody @Valid PostRequest postRequest){
+            @RequestBody @Valid PostRequest postRequest) {
         log.trace(ApiLogoMessage.NAME_OF_CURRENT_METHOD.getValue(), APIUtils.getMethodName());
         IamResponse<PostDTO> response = postService.createPost(postRequest);
         return ResponseEntity.ok(response);
@@ -42,7 +45,7 @@ public class PostController {
     @PutMapping("${end.point.id}")
     public ResponseEntity<IamResponse<PostDTO>> updatePost(
             @PathVariable(name = "id") Integer postId,
-            @RequestBody @Valid UpdatePostRequest updatePostRequest){
+            @RequestBody @Valid UpdatePostRequest updatePostRequest) {
         log.trace(ApiLogoMessage.NAME_OF_CURRENT_METHOD.getValue(), APIUtils.getMethodName());
         IamResponse<PostDTO> response = postService.updatePost(postId, updatePostRequest);
         return ResponseEntity.ok(response);
@@ -50,7 +53,7 @@ public class PostController {
 
     @DeleteMapping("${end.point.id}")
     public ResponseEntity<Void> softDeletePost(
-            @PathVariable(name = "id") Integer postId){
+            @PathVariable(name = "id") Integer postId) {
         log.trace(ApiLogoMessage.NAME_OF_CURRENT_METHOD.getValue(), APIUtils.getMethodName());
         postService.softDeletePost(postId);
         return ResponseEntity.ok().build();
@@ -59,7 +62,8 @@ public class PostController {
     @GetMapping("${end.points.all}")
     public ResponseEntity<IamResponse<PaginationResponse<PostSearchDTO>>> getAllPosts(
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "limit", defaultValue = "10") int limit){
+            @RequestParam(name = "limit", defaultValue = "10") int limit)
+    {
         log.trace(ApiLogoMessage.NAME_OF_CURRENT_METHOD.getValue(), APIUtils.getMethodName());
 
         Pageable pageable = PageRequest.of(page, limit);
@@ -68,4 +72,14 @@ public class PostController {
 
     }
 
+    @PostMapping("${end.points.search}")
+    public ResponseEntity<IamResponse<PaginationResponse<PostSearchDTO>>> searchPost(
+            @RequestBody @Valid PostSearchRequest request,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "limit", defaultValue = "10") int limit) {
+        log.trace(ApiLogoMessage.NAME_OF_CURRENT_METHOD.getValue(), APIUtils.getMethodName());
+        Pageable pageable = PageRequest.of(page, limit);
+        IamResponse<PaginationResponse<PostSearchDTO>> response = postService.searchPosts(request, pageable);
+        return ResponseEntity.ok(response);
+    }
 }
