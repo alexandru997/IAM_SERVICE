@@ -31,11 +31,10 @@ public class User {
     private String email;
 
     @Column(nullable = false)
-    private String created;
-
+    private LocalDateTime created;
 
     @Column(nullable = false)
-    private String updated;
+    private LocalDateTime updated;
 
     @Column()
     private LocalDateTime last_login;
