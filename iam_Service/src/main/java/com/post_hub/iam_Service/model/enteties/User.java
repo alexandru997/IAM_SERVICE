@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -45,5 +46,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name ="registration_status",nullable = false)
     private RegistrationStatus registrationStatus;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Post> posts;
 
 }
