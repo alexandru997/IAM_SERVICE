@@ -15,12 +15,15 @@ CREATE TABLE users(
 CREATE TABLE posts
 (
     id      BIGSERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL ,
     title   VARCHAR(255),
     content TEXT,
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted BOOLEAN   NOT NULL DEFAULT FALSE,
     likes   INTEGER   NOT NULL DEFAULT 0,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+
     Unique (title)
 );
 
@@ -31,18 +34,20 @@ INSERT INTO users(username, password, email,created, updated, registration_statu
                   ('third_user', 'password2', 'third_user_user@gmail.com', CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'ACTIVE', CURRENT_TIMESTAMP, false)
 
 ;
-
-INSERT INTO posts(title, content, created, updated, deleted, likes)
-VALUES ('First post',
-        'This is the first post',
-        CURRENT_TIMESTAMP,
-        CURRENT_TIMESTAMP,
-        false,
-        9),
-       ('Second post',
-        'This is the second post',
-        CURRENT_TIMESTAMP,
-        CURRENT_TIMESTAMP,
-        false,
-        20);
+INSERT INTO posts (user_id, title, content, created, updated, deleted, likes) VALUES
+                                                                                  (1, 'First Post', 'This is content of the first post', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, false, 6),
+                                                                                  (2, 'Second Post', 'This is content of the second post', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, false, 3);
+-- INSERT INTO posts(title, content, created, updated, deleted, likes)
+-- VALUES ('First post',
+--         'This is the first post',
+--         CURRENT_TIMESTAMP,
+--         CURRENT_TIMESTAMP,
+--         false,
+--         9),
+--        ('Second post',
+--         'This is the second post',
+--         CURRENT_TIMESTAMP,
+--         CURRENT_TIMESTAMP,
+--         false,
+--         20);
 

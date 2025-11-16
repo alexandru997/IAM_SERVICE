@@ -5,6 +5,7 @@ import com.post_hub.iam_Service.model.constants.ApiErrorMessage;
 import com.post_hub.iam_Service.model.dto.post.PostDTO;
 import com.post_hub.iam_Service.model.dto.post.PostSearchDTO;
 import com.post_hub.iam_Service.model.enteties.Post;
+import com.post_hub.iam_Service.model.enteties.User;
 import com.post_hub.iam_Service.model.exeption.DataExistException;
 import com.post_hub.iam_Service.model.exeption.NotFoundException;
 import com.post_hub.iam_Service.model.request.post.PostRequest;
@@ -13,6 +14,7 @@ import com.post_hub.iam_Service.model.request.post.UpdatePostRequest;
 import com.post_hub.iam_Service.model.response.IamResponse;
 import com.post_hub.iam_Service.model.response.PaginationResponse;
 import com.post_hub.iam_Service.repositories.PostRepository;
+import com.post_hub.iam_Service.repositories.UserRepository;
 import com.post_hub.iam_Service.repositories.criteria.PostSearchCriteria;
 import com.post_hub.iam_Service.service.PostService;
 import jakarta.validation.constraints.NotNull;
@@ -28,6 +30,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
     private final PostMapper postMapper;
 
     @Override
@@ -39,13 +42,15 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public IamResponse<PostDTO> createPost(@NotNull PostRequest postRequest) {
+    public IamResponse<PostDTO> createPost(@NotNull Integer userId, PostRequest postRequest) {
 
         if (postRepository.existsByTitle(postRequest.getTitle())) {
             throw new DataExistException(ApiErrorMessage.POST_ALREADY_EXISTS.getMessage(postRequest.getTitle()));
         }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(userId)));
 
-        Post post = postMapper.createPost(postRequest);
+        Post post = postMapper.createPost(postRequest, user);
         Post savedPost = postRepository.save(post);
         PostDTO postDTO = postMapper.toPostDTO(savedPost);
         return IamResponse.createSuccessful(postDTO);
