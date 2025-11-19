@@ -2,8 +2,12 @@ package com.post_hub.iam_Service.controller;
 
 import com.post_hub.iam_Service.model.constants.ApiLogoMessage;
 import com.post_hub.iam_Service.model.dto.user.UserDTO;
+import com.post_hub.iam_Service.model.dto.user.UserSearchDTO;
 import com.post_hub.iam_Service.model.request.user.NewUserRequest;
+import com.post_hub.iam_Service.model.request.user.UpdateUserRequest;
+import com.post_hub.iam_Service.model.request.user.UserSearchRequest;
 import com.post_hub.iam_Service.model.response.IamResponse;
+import com.post_hub.iam_Service.model.response.PaginationResponse;
 import com.post_hub.iam_Service.service.UserService;
 import com.post_hub.iam_Service.utils.APIUtils;
 import jakarta.validation.Valid;
@@ -12,6 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @Slf4j
 @RestController
@@ -34,7 +41,50 @@ public class UserController {
             @RequestBody @Valid NewUserRequest request) {
         log.trace(ApiLogoMessage.NAME_OF_CURRENT_METHOD.getValue(), APIUtils.getMethodName());
 
-        IamResponse<UserDTO> response = userService.createUser(request);
+        IamResponse<UserDTO> createdUser = userService.createUser(request);
+        return ResponseEntity.ok(createdUser);
+    }
+
+    @PutMapping("${end.point.id}")
+    public ResponseEntity<IamResponse<UserDTO>> updateUserById(
+            @PathVariable(name = "id") Integer userId,
+            @RequestBody @Valid UpdateUserRequest request) {
+        log.trace(ApiLogoMessage.NAME_OF_CURRENT_METHOD.getValue(), APIUtils.getMethodName());
+
+        IamResponse<UserDTO> update = userService.updateUser(userId, request);
+        return ResponseEntity.ok(update);
+    }
+
+    @DeleteMapping("${end.point.id}")
+    public ResponseEntity<Void> softDeleteUser(
+            @PathVariable(name = "id") Integer userId
+    ) {
+        log.trace(ApiLogoMessage.NAME_OF_CURRENT_METHOD.getValue(), APIUtils.getMethodName());
+
+        userService.softDeleteUser(userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("${end.points.all}")
+    public ResponseEntity<IamResponse<PaginationResponse<UserSearchDTO>>> getAllUsers(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "limit", defaultValue = "10") int limit) {
+        log.trace(ApiLogoMessage.NAME_OF_CURRENT_METHOD.getValue(), APIUtils.getMethodName());
+
+        Pageable pageable = PageRequest.of(page, limit);
+        IamResponse<PaginationResponse<UserSearchDTO>> response = userService.findAllUsers(pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("${end.points.search}")
+    public ResponseEntity<IamResponse<PaginationResponse<UserSearchDTO>>> searchUsers(
+            @RequestBody @Valid UserSearchRequest request,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "limit", defaultValue = "10") int limit) {
+        log.trace(ApiLogoMessage.NAME_OF_CURRENT_METHOD.getValue(), APIUtils.getMethodName());
+
+        Pageable pageable = PageRequest.of(page, limit);
+        IamResponse<PaginationResponse<UserSearchDTO>> response = userService.searchUsers(request, pageable);
         return ResponseEntity.ok(response);
     }
 }

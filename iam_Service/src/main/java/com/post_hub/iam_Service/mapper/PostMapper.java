@@ -6,7 +6,6 @@ import com.post_hub.iam_Service.model.enteties.Post;
 import com.post_hub.iam_Service.model.enteties.User;
 import com.post_hub.iam_Service.model.request.post.PostRequest;
 import com.post_hub.iam_Service.model.request.post.UpdatePostRequest;
-import org.hibernate.type.descriptor.DateTimeUtils;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -17,7 +16,7 @@ import java.util.Objects;
 @Mapper(
         componentModel = "spring",
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
-        imports = {DateTimeUtils .class, Objects .class}
+        imports = {Objects.class}
 )
 public interface PostMapper {
 
