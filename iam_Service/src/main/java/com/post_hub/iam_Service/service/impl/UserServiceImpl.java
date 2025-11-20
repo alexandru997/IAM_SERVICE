@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -30,6 +31,7 @@ import java.time.LocalDateTime;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
     @Override
     public IamResponse<UserDTO> getById(@NonNull Integer userId) {
         User user = userRepository.findById(userId)
@@ -50,6 +52,7 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = userMapper.createUser(newUserRequest);
+        user.setPassword(passwordEncoder.encode(newUserRequest.getPassword()));
         User savedUser = userRepository.save(user);
         UserDTO userDTO = userMapper.toDto(savedUser);
 
