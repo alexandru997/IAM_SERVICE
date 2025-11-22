@@ -48,7 +48,7 @@ public class PostServiceImpl implements PostService {
             throw new DataExistException(ApiErrorMessage.POST_ALREADY_EXISTS.getMessage(postRequest.getTitle()));
         }
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(userId)));
+                .orElseThrow(() -> new NotFoundException(ApiErrorMessage.USER_NOT_FOUND_BY_ID.getMessage(userId)));
 
         Post post = postMapper.createPost(postRequest, user);
         Post savedPost = postRepository.save(post);

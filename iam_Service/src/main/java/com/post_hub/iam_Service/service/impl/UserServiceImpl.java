@@ -4,6 +4,7 @@ import com.post_hub.iam_Service.mapper.UserMapper;
 import com.post_hub.iam_Service.model.constants.ApiErrorMessage;
 import com.post_hub.iam_Service.model.dto.user.UserDTO;
 import com.post_hub.iam_Service.model.dto.user.UserSearchDTO;
+import com.post_hub.iam_Service.model.enteties.Role;
 import com.post_hub.iam_Service.model.enteties.User;
 import com.post_hub.iam_Service.model.exeption.DataExistException;
 import com.post_hub.iam_Service.model.exeption.NotFoundException;
@@ -12,9 +13,11 @@ import com.post_hub.iam_Service.model.request.user.UpdateUserRequest;
 import com.post_hub.iam_Service.model.request.user.UserSearchRequest;
 import com.post_hub.iam_Service.model.response.IamResponse;
 import com.post_hub.iam_Service.model.response.PaginationResponse;
+import com.post_hub.iam_Service.repositories.RoleRepository;
 import com.post_hub.iam_Service.repositories.UserRepository;
 import com.post_hub.iam_Service.repositories.criteria.UserSearchCriteria;
 import com.post_hub.iam_Service.service.UserService;
+import com.post_hub.iam_Service.service.model.IamServiceUserRole;
 import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +28,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +37,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
     @Override
     public IamResponse<UserDTO> getById(@NonNull Integer userId) {
         User user = userRepository.findById(userId)
@@ -43,16 +49,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public IamResponse<UserDTO> createUser(@NotNull NewUserRequest newUserRequest) {
-        if (userRepository.existsByUsername(newUserRequest.getUsername())) {
-            throw new DataExistException(ApiErrorMessage.USERNAME_ALREADY_EXISTS.getMessage(newUserRequest.getUsername()));
-        }
 
         if (userRepository.existsByEmail(newUserRequest.getEmail())) {
             throw new DataExistException(ApiErrorMessage.EMAIL_ALREADY_EXISTS.getMessage(newUserRequest.getEmail()));
         }
 
+        if (userRepository.existsByUsername(newUserRequest.getUsername())) {
+            throw new DataExistException(ApiErrorMessage.USERNAME_ALREADY_EXISTS.getMessage(newUserRequest.getUsername()));
+
+        }
+
+        Role userRole =  roleRepository.findByName(IamServiceUserRole.USER.getRole())
+                .orElseThrow(()-> new NotFoundException(ApiErrorMessage.USER_ROLE_NOT_FOUND.getMessage()));
+
         User user = userMapper.createUser(newUserRequest);
         user.setPassword(passwordEncoder.encode(newUserRequest.getPassword()));
+        Set<Role> roles = new HashSet<>();
+        roles.add(userRole);
+        user.setRoles(roles);
         User savedUser = userRepository.save(user);
         UserDTO userDTO = userMapper.toDto(savedUser);
 
