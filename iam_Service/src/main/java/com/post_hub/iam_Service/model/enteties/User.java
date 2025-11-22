@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -25,11 +26,11 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Size(max=30)
+    @Size(max = 30)
     @Column(nullable = false, length = 30)
     private String username;
 
-    @Size(max=80)
+    @Size(max = 80)
     @Column(nullable = false, length = 80)
     private String password;
 
@@ -49,10 +50,18 @@ public class User {
     private Boolean deleted = false;
 
     @Enumerated(EnumType.STRING)
-    @Column(name ="registration_status",nullable = false)
+    @Column(name = "registration_status", nullable = false)
     private RegistrationStatus registrationStatus;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts;
 
+    @ManyToMany
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+
+    )
+    private Collection<Role> roles;
 }
