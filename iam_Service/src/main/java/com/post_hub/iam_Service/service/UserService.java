@@ -9,8 +9,11 @@ import com.post_hub.iam_Service.model.response.IamResponse;
 import com.post_hub.iam_Service.model.response.PaginationResponse;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-public interface UserService {
+public interface UserService extends UserDetailsService {
 
     IamResponse<UserDTO> getById(@NotNull Integer userId);
     IamResponse<UserDTO> createUser(@NotNull NewUserRequest newUserRequest);
@@ -21,4 +24,6 @@ public interface UserService {
     IamResponse<PaginationResponse<UserSearchDTO>> findAllUsers(Pageable pageable);
 
     IamResponse<PaginationResponse<UserSearchDTO>> searchUsers(UserSearchRequest request, Pageable pageable);
+
+    UserDetails loadUserByUsername(String email) throws UsernameNotFoundException;
 }
