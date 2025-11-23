@@ -11,7 +11,7 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class UserProfile implements Serializable {
+public class UserProfileDTO implements Serializable {
     private Integer id;
     private String username;
     private String email;
