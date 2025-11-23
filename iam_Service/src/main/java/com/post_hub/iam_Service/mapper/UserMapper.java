@@ -22,7 +22,6 @@ import java.util.List;
         imports = {RegistrationStatus.class, Object.class}
 )
 public interface UserMapper {
-    @Mapping(source = "last_login", target = "lastLogin")
     @Mapping(target="roles", expression ="java(mapRoles(user.getRoles()))")
     UserDTO toDto(User user);
 
@@ -36,7 +35,7 @@ public interface UserMapper {
     @Mapping(target = "updated", ignore = true)
     @Mapping(target = "deleted", ignore = true)
     @Mapping(target = "registrationStatus", ignore = true)
-    @Mapping(target = "last_login", ignore = true)
+    @Mapping(target = "lastLogin", ignore = true)
     @Mapping(target = "posts", ignore = true)
     void updateUser(@MappingTarget User user, UpdateUserRequest request);
 
