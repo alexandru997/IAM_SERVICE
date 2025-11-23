@@ -12,6 +12,7 @@ public enum ApiErrorMessage {
     USER_NOT_FOUND_BY_ID("User with ID: %s not found"),
     USERNAME_ALREADY_EXISTS("Username: %s already exists"),
     EMAIL_ALREADY_EXISTS("Email: %s already exists"),
+    EMAIL_NOT_FOUND("Email: %s not found"),
     USER_ROLE_NOT_FOUND("User role not found"),
 
     INVALID_TOKEN_SIGNATURE("Invalid token signature"),
