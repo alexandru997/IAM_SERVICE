@@ -20,6 +20,11 @@ public enum ApiErrorMessage {
     TOKEN_EXPIRED("Token expired."),
     UNEXPECTED_ERROR_OCCURRED("An unexpected error occurred. Please try again later."),
 
+    AUTHENTICATION_FAILED_FOR_USER("Authentication failed for user: {}. "),
+    INVALID_USER_OR_PASSWORD("Invalid email or password. Try again"),
+    INVALID_USER_REGISTRATION_STATUS("Invalid user registration status: %s. "),
+    NOT_FOUND_REFRESH_TOKEN("Refresh token not found."),
+
     ;
 
     private final String message;
