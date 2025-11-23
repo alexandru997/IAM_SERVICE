@@ -43,8 +43,8 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime updated = LocalDateTime.now();
 
-    @Column()
-    private LocalDateTime last_login;
+    @Column(name = "last_login")
+    private LocalDateTime lastLogin;
 
     @Column(nullable = false)
     private Boolean deleted = false;
