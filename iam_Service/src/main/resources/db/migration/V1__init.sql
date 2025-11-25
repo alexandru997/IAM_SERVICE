@@ -41,6 +41,16 @@ CREATE TABLE users_roles (
                              FOREIGN KEY (user_id) REFERENCES users (id),
                              FOREIGN KEY (role_id) REFERENCES roles (id)
 );
+
+CREATE TABLE refresh_token (
+                               id SERIAL PRIMARY KEY,
+                               token VARCHAR(128) NOT NULL,
+                               created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                               user_id BIGINT NOT NULL,
+                               CONSTRAINT FK_refresh_tokens_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+                               CONSTRAINT refresh_token_UNIQUE UNIQUE (user_id, id)
+);
+
 INSERT INTO users(username, password, email,created, updated, registration_status, last_login, deleted) VALUES
                   ('super_admin', '$2a$10$6zddZfS84WBX/tM5flqq6e/ves0CzUcYVcW33LpWzakiwZXEx/1By', 'super_admin@gmail.com', CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'ACTIVE', CURRENT_TIMESTAMP, false),
                   ('admin', '$2a$10$TumEkYb6AvGqHpvflKenLeD66UodoMU8Et11.lCGHwjjLU.CvY6ku', 'admin@gmail.com', CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'ACTIVE', CURRENT_TIMESTAMP, false),
