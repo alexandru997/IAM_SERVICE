@@ -3,6 +3,7 @@ package com.post_hub.iam_Service.advice;
 import com.post_hub.iam_Service.model.constants.ApiConstants;
 import com.post_hub.iam_Service.model.exception.InvalidDataException;
 import com.post_hub.iam_Service.model.exeption.DataExistException;
+import com.post_hub.iam_Service.model.exeption.InvalidPasswordException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.websocket.AuthenticationException;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -70,7 +72,12 @@ public class CommonControllerAdvice {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ex.getMessage());
     }
-
+    @ExceptionHandler(InvalidPasswordException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public String handleInvalidPasswordException(InvalidPasswordException ex) {
+        return ex.getMessage();
+    }
     private void logStackTrace(Exception ex) {
         StringBuilder stackTrace = new StringBuilder();
 

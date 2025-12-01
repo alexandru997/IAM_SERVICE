@@ -4,6 +4,7 @@ import com.post_hub.iam_Service.mapper.UserMapper;
 import com.post_hub.iam_Service.model.constants.ApiErrorMessage;
 import com.post_hub.iam_Service.model.enteties.Role;
 import com.post_hub.iam_Service.model.exeption.DataExistException;
+import com.post_hub.iam_Service.model.exeption.InvalidPasswordException;
 import com.post_hub.iam_Service.model.exeption.NotFoundException;
 import com.post_hub.iam_Service.model.request.user.LoginRequest;
 import com.post_hub.iam_Service.model.dto.user.UserProfileDTO;
@@ -18,6 +19,7 @@ import com.post_hub.iam_Service.security.JwtTokenProvider;
 import com.post_hub.iam_Service.service.AuthService;
 import com.post_hub.iam_Service.service.model.IamServiceUserRole;
 import com.post_hub.iam_Service.service.model.RefreshTokenService;
+import com.post_hub.iam_Service.utils.PasswordUtils;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -83,6 +85,17 @@ public class AuthServiceImpl implements AuthService {
         userRepository.findByEmail(request.getEmail()).ifPresent(existingUser -> {
             throw new DataExistException(ApiErrorMessage.EMAIL_ALREADY_EXISTS.getMessage(request.getEmail()));
         });
+
+        String password = request.getPassword();
+        String confirmPassword = request.getConfirmPassword();
+
+        if (!password.equals(confirmPassword)) {
+            throw new InvalidDataException(ApiErrorMessage.MISMATCH_PASSWORDS.getMessage());
+        }
+
+        if (PasswordUtils.isNotValidPassword(password)) {
+            throw new InvalidPasswordException(ApiErrorMessage.INVALID_PASSWORD.getMessage());
+        }
 
         Role userRole = roleRepository.findByName(IamServiceUserRole.USER.getRole())
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.USER_ROLE_NOT_FOUND.getMessage()));
