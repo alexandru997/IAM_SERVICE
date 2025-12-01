@@ -6,4 +6,6 @@ import com.post_hub.iam_Service.model.response.IamResponse;
 
 public interface AuthService {
     IamResponse<UserProfileDTO> login(LoginRequest request);
+
+    IamResponse<UserProfileDTO> refreshAccessToken(String refreshToken);
 }
