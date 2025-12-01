@@ -1,7 +1,7 @@
 package com.post_hub.iam_Service.controller;
 
 import com.post_hub.iam_Service.model.constants.ApiLogoMessage;
-import com.post_hub.iam_Service.model.dto.user.LoginRequest;
+import com.post_hub.iam_Service.model.request.user.LoginRequest;
 import com.post_hub.iam_Service.model.dto.user.UserProfileDTO;
 import com.post_hub.iam_Service.model.response.IamResponse;
 import com.post_hub.iam_Service.service.AuthService;

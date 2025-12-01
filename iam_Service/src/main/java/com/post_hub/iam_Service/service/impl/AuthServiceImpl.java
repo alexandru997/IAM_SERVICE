@@ -2,7 +2,7 @@ package com.post_hub.iam_Service.service.impl;
 
 import com.post_hub.iam_Service.mapper.UserMapper;
 import com.post_hub.iam_Service.model.constants.ApiErrorMessage;
-import com.post_hub.iam_Service.model.dto.user.LoginRequest;
+import com.post_hub.iam_Service.model.request.user.LoginRequest;
 import com.post_hub.iam_Service.model.dto.user.UserProfileDTO;
 import com.post_hub.iam_Service.model.enteties.RefreshToken;
 import com.post_hub.iam_Service.model.enteties.User;

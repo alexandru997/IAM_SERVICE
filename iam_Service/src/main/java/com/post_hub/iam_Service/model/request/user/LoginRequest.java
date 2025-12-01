@@ -1,4 +1,4 @@
-package com.post_hub.iam_Service.model.dto.user;
+package com.post_hub.iam_Service.model.request.user;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
