@@ -2,7 +2,10 @@ package com.post_hub.iam_Service.utils;
 
 import com.post_hub.iam_Service.model.constants.ApiConstants;
 import jakarta.servlet.http.Cookie;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
+
+import java.util.UUID;
 
 public class APIUtils {
 
@@ -21,5 +24,9 @@ public class APIUtils {
         authorizationCookie.setPath("/");
         authorizationCookie.setMaxAge(300);
         return authorizationCookie;
+    }
+
+    public static String generateUuidWithoutDash() {
+        return UUID.randomUUID().toString().replace(ApiConstants.DASH, StringUtils.EMPTY);
     }
 }
