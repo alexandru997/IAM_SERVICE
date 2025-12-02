@@ -16,6 +16,7 @@ import com.post_hub.iam_Service.model.response.PaginationResponse;
 import com.post_hub.iam_Service.repositories.RoleRepository;
 import com.post_hub.iam_Service.repositories.UserRepository;
 import com.post_hub.iam_Service.repositories.criteria.UserSearchCriteria;
+import com.post_hub.iam_Service.security.validation.AccessValidator;
 import com.post_hub.iam_Service.service.UserService;
 import com.post_hub.iam_Service.service.model.IamServiceUserRole;
 import jakarta.validation.constraints.NotNull;
@@ -42,12 +43,12 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+    private final AccessValidator accessValidator;
     @Override
     public IamResponse<UserDTO> getById(@NonNull Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(()-> new NotFoundException(ApiErrorMessage.USER_NOT_FOUND_BY_ID.getMessage(userId)));
-        UserDTO userDTO =  userMapper.toDto(user);
-        return IamResponse.createSuccessful(userDTO);
+        return IamResponse.createSuccessful(userMapper.toDto(user));
 
     }
 
@@ -72,29 +73,34 @@ public class UserServiceImpl implements UserService {
         roles.add(userRole);
         user.setRoles(roles);
         User savedUser = userRepository.save(user);
-        UserDTO userDTO = userMapper.toDto(savedUser);
-
-        return IamResponse.createSuccessful(userDTO);
+        return IamResponse.createSuccessful(userMapper.toDto(savedUser));
     }
 
     @Override
     public IamResponse<UserDTO> updateUser(@NotNull Integer userId, @NotNull UpdateUserRequest request) {
         User user = userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.USER_NOT_FOUND_BY_ID.getMessage(userId)));
+        accessValidator.validateAdminOrOwnerAccess(userId);
+
+        if (!user.getUsername().equals(request.getUsername()) && userRepository.existsByUsername(request.getUsername())) {
+            throw new DataExistException(ApiErrorMessage.USERNAME_ALREADY_EXISTS.getMessage(request.getUsername()));
+        }
+
+        if (!user.getEmail().equals(request.getEmail()) && userRepository.existsByEmail(request.getEmail())) {
+            throw new DataExistException(ApiErrorMessage.EMAIL_ALREADY_EXISTS.getMessage(request.getEmail()));
+        }
 
         userMapper.updateUser(user, request);
-        user.setUpdated(LocalDateTime.now());
         user = userRepository.save(user);
 
-        UserDTO userDTO = userMapper.toDto(user);
-        return IamResponse.createSuccessful(userDTO);
+        return IamResponse.createSuccessful(userMapper.toDto(user));
     }
 
     @Override
     public void softDeleteUser(Integer userId) {
         User user = userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.USER_NOT_FOUND_BY_ID.getMessage(userId)));
-
+        accessValidator.validateAdminOrOwnerAccess(userId);
         user.setDeleted(true);
         userRepository.save(user);
     }

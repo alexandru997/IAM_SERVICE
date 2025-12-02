@@ -7,10 +7,10 @@ import java.io.Serializable;
 
 @Data
 public class UpdateUserRequest  implements Serializable {
-    @NotBlank(message = "Username cannot be empty")
+
     private String username;
 
-    @NotBlank(message = "Email cannot be empty")
+
     private String email;
 
     private String password;

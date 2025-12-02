@@ -34,11 +34,7 @@ public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "created", ignore = true)
-    @Mapping(target = "updated", ignore = true)
-    @Mapping(target = "deleted", ignore = true)
-    @Mapping(target = "registrationStatus", ignore = true)
-    @Mapping(target = "lastLogin", ignore = true)
-    @Mapping(target = "posts", ignore = true)
+    @Mapping(target = "updated", expression = "java(java.time.LocalDateTime.now())")
     void updateUser(@MappingTarget User user, UpdateUserRequest request);
 
     @Mapping(source = "deleted", target ="isDeleted")

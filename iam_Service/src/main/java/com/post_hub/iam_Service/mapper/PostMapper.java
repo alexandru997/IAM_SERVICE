@@ -24,11 +24,16 @@ public interface PostMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "created", ignore = true)
-    Post createPost(PostRequest postRequest);
+    @Mapping(target = "updated", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(source = "user", target = "user")
+    @Mapping(source = "createdBy", target = "createdBy")
+    Post createPost(PostRequest postRequest,User user, String createdBy);
 
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "created", ignore = true)
+    @Mapping(target = "updated", expression = "java(java.time.LocalDateTime.now())")
     void updatePost(@MappingTarget Post post, UpdatePostRequest postRequest);
 
     @Mapping(source = "deleted", target = "isDeleted")

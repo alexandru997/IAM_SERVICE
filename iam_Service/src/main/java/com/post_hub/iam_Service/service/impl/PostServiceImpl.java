@@ -18,11 +18,13 @@ import com.post_hub.iam_Service.repositories.UserRepository;
 import com.post_hub.iam_Service.repositories.criteria.PostSearchCriteria;
 import com.post_hub.iam_Service.security.validation.AccessValidator;
 import com.post_hub.iam_Service.service.PostService;
+import com.post_hub.iam_Service.utils.APIUtils;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -34,33 +36,28 @@ public class PostServiceImpl implements PostService {
     private final UserRepository userRepository;
     private final PostMapper postMapper;
     private final AccessValidator accessValidator;
+    private final APIUtils apiUtils;
 
     @Override
     public IamResponse<PostDTO> getById(@NotNull Integer postId) {
         Post post = postRepository.findByIdAndDeletedFalse(postId)
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(postId)));
-        accessValidator.validateAdminOrOwnerAccess(post.getUser().getId());
-        PostDTO postDTO = postMapper.toPostDTO(post);
-        return IamResponse.createSuccessful(postDTO);
+        return IamResponse.createSuccessful(postMapper.toPostDTO(post));
     }
 
     @Override
-    public IamResponse<PostDTO> createPost(@NotNull  PostRequest postRequest, String username) {
+    public IamResponse<PostDTO> createPost(@NotNull  PostRequest postRequest) {
         if (postRepository.existsByTitle(postRequest.getTitle())) {
             throw new DataExistException(ApiErrorMessage.POST_ALREADY_EXISTS.getMessage(postRequest.getTitle()));
         }
+        Integer userId = apiUtils.getUserIdFromAuthentication();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException(ApiErrorMessage.USERNAME_NOT_FOUND.getMessage(userId)));
 
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new NotFoundException(ApiErrorMessage.USERNAME_NOT_FOUND.getMessage(username)));
-
-        Post post = postMapper.createPost(postRequest);
-        post.setUser(user);
-        post.setCreatedBy(username);
-        post.setCreatedBy(username);
+        Post post = postMapper.createPost(postRequest, user, user.getUsername());
         post = postRepository.save(post);
 
-        PostDTO postDto = postMapper.toPostDTO(post);
-        return IamResponse.createSuccessful(postDto);
+        return IamResponse.createSuccessful(postMapper.toPostDTO(post));
 
     }
 
@@ -70,14 +67,13 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(postId)));
         accessValidator.validateAdminOrOwnerAccess(post.getUser().getId());
 
-        if (postRepository.existsByTitle(request.getTitle())) {
+        if (!post.getTitle().equals(request.getTitle()) && postRepository.existsByTitle(request.getTitle())) {
             throw new DataExistException(ApiErrorMessage.POST_ALREADY_EXISTS.getMessage(request.getTitle()));
         }
         postMapper.updatePost(post, request);
-        post.setUpdated(LocalDateTime.now());
         post = postRepository.save(post);
-        PostDTO postDTO = postMapper.toPostDTO(post);
-        return IamResponse.createSuccessful(postDTO);
+
+        return IamResponse.createSuccessful(postMapper.toPostDTO(post));
     }
 
     @Override

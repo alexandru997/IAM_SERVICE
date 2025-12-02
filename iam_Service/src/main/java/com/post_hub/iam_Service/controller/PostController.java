@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import org.springframework.data.domain.Pageable;
 
-import java.security.Principal;
+
 
 @Slf4j
 @RestController
@@ -40,9 +40,9 @@ public class PostController {
 
     @PostMapping("${end.points.create}")
     public ResponseEntity<IamResponse<PostDTO>> createPost(
-            @RequestBody @Valid PostRequest postRequest, Principal principal) {
+            @RequestBody @Valid PostRequest postRequest) {
         log.trace(ApiLogoMessage.NAME_OF_CURRENT_METHOD.getValue(), APIUtils.getMethodName());
-        IamResponse<PostDTO> response = postService.createPost(postRequest, principal.getName());
+        IamResponse<PostDTO> response = postService.createPost(postRequest);
         return ResponseEntity.ok(response);
     }
 
