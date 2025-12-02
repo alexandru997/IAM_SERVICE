@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static io.jsonwebtoken.Jwts.claims;
+
 @Slf4j
 @Component
 public class JwtTokenProvider {
@@ -69,8 +71,9 @@ public class JwtTokenProvider {
         }
     }
 
-    public String getEmail(String token) {
-        return getAllClaimsFromToken(token).getSubject();
+    public String getUsername(String token) {
+        Claims claims = getAllClaimsFromToken(token);
+        return claims.get(AuthenticationConstants.USERNAME, String.class);
     }
 
     public List<String> getRoles(String token) {
