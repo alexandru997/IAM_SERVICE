@@ -4,6 +4,7 @@ import com.post_hub.iam_Service.model.constants.ApiConstants;
 import com.post_hub.iam_Service.model.exception.InvalidDataException;
 import com.post_hub.iam_Service.model.exeption.DataExistException;
 import com.post_hub.iam_Service.model.exeption.InvalidPasswordException;
+import com.post_hub.iam_Service.model.exeption.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.websocket.AuthenticationException;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import org.springframework.security.access.AccessDeniedException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +29,7 @@ public class CommonControllerAdvice {
 
     @ExceptionHandler
     @ResponseBody
-    protected ResponseEntity<String> handleException(Exception ex) {
+    protected ResponseEntity<String> handleException(NotFoundException ex) {
         logStackTrace(ex);
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
@@ -78,6 +80,17 @@ public class CommonControllerAdvice {
     public String handleInvalidPasswordException(InvalidPasswordException ex) {
         return ex.getMessage();
     }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseBody
+    protected ResponseEntity<String> handleAccessDeniedException(AccessDeniedException ex) {
+        logStackTrace(ex);
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ex.getMessage());
+
+    }
+
     private void logStackTrace(Exception ex) {
         StringBuilder stackTrace = new StringBuilder();
 
