@@ -1,7 +1,9 @@
 package com.post_hub.iam_Service.config;
 
 import com.post_hub.iam_Service.security.filter.JwtRequestFilter;
+import com.post_hub.iam_Service.security.handler.AccessRestrictionHandler;
 import com.post_hub.iam_Service.service.UserService;
+import com.post_hub.iam_Service.service.model.IamServiceUserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +27,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtRequestFilter jwtRequestFilter;
+    private final AccessRestrictionHandler accessRestrictionHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -34,10 +37,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login", "/auth/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/auth/refresh/token").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/users/create").hasAnyAuthority(adminAccessSecurityRoles())
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                        .accessDeniedHandler(accessRestrictionHandler)
                 )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -63,5 +68,11 @@ public class SecurityConfig {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
+    private String[] adminAccessSecurityRoles() {
+        return new String[]{
+                IamServiceUserRole.SUPER_ADMIN.name(),
+                IamServiceUserRole.ADMIN.name()
+        };
+    }
 
 }
