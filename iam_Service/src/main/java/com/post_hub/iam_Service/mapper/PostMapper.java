@@ -24,9 +24,7 @@ public interface PostMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "created", ignore = true)
-    @Mapping(target ="user", source="user")
-    @Mapping(target="createdBy", source="user.username")
-    Post createPost(PostRequest postRequest, User user);
+    Post createPost(PostRequest postRequest);
 
 
     @Mapping(target = "id", ignore = true)
