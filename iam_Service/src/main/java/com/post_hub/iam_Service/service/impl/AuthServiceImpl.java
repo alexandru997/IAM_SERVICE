@@ -16,6 +16,7 @@ import com.post_hub.iam_Service.model.response.IamResponse;
 import com.post_hub.iam_Service.repositories.RoleRepository;
 import com.post_hub.iam_Service.repositories.UserRepository;
 import com.post_hub.iam_Service.security.JwtTokenProvider;
+import com.post_hub.iam_Service.security.validation.AccessValidator;
 import com.post_hub.iam_Service.service.AuthService;
 import com.post_hub.iam_Service.service.model.IamServiceUserRole;
 import com.post_hub.iam_Service.service.model.RefreshTokenService;
@@ -44,6 +45,7 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenService refreshTokenService;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AccessValidator accessValidator;
 
     @Override
     public IamResponse<UserProfileDTO> login(@NotNull LoginRequest request) {
@@ -77,25 +79,13 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public IamResponse<UserProfileDTO> registerUser(@NotNull  RegistrationUserRequest request) {
-        userRepository.findByUsername(request.getUsername()).ifPresent(existingUser -> {
-            throw new DataExistException(ApiErrorMessage.USERNAME_ALREADY_EXISTS.getMessage(request.getUsername()));
-        });
-
-        userRepository.findByEmail(request.getEmail()).ifPresent(existingUser -> {
-            throw new DataExistException(ApiErrorMessage.EMAIL_ALREADY_EXISTS.getMessage(request.getEmail()));
-        });
-
-        String password = request.getPassword();
-        String confirmPassword = request.getConfirmPassword();
-
-        if (!password.equals(confirmPassword)) {
-            throw new InvalidDataException(ApiErrorMessage.MISMATCH_PASSWORDS.getMessage());
-        }
-
-        if (PasswordUtils.isNotValidPassword(password)) {
-            throw new InvalidPasswordException(ApiErrorMessage.INVALID_PASSWORD.getMessage());
-        }
+    public IamResponse<UserProfileDTO> registerUser(@NotNull RegistrationUserRequest request) {
+        accessValidator.validateNewUser(
+                request.getUsername(),
+                request.getEmail(),
+                request.getPassword(),
+                request.getConfirmPassword()
+        );
 
         Role userRole = roleRepository.findByName(IamServiceUserRole.USER.getRole())
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.USER_ROLE_NOT_FOUND.getMessage()));
