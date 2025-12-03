@@ -1,6 +1,8 @@
 package com.post_hub.iam_Service.advice;
 
 import com.post_hub.iam_Service.model.constants.ApiConstants;
+import com.post_hub.iam_Service.model.constants.ApiErrorMessage;
+import com.post_hub.iam_Service.model.exception.InternalException;
 import com.post_hub.iam_Service.model.exception.InvalidDataException;
 import com.post_hub.iam_Service.model.exeption.DataExistException;
 import com.post_hub.iam_Service.model.exeption.InvalidPasswordException;
@@ -90,7 +92,14 @@ public class CommonControllerAdvice {
                 .body(ex.getMessage());
 
     }
-
+    @ExceptionHandler(InternalException.class)
+    @ResponseBody
+    protected ResponseEntity<String> handleUndefinedException(InternalException ex) {
+        logStackTrace(ex);
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiErrorMessage.UNEXPECTED_ERROR_OCCURRED.getMessage());
+    }
     private void logStackTrace(Exception ex) {
         StringBuilder stackTrace = new StringBuilder();
 

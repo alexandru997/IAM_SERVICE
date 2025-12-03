@@ -13,10 +13,10 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class PostRequest implements Serializable {
 
-    @NotBlank(message = "Title can not be empty")
+
     private String title;
-    @NotBlank(message = "Content can not be empty")
+
     private String content;
-    @NotNull(message = "Likes can not be empty")
+
     private Integer likes;
 }
