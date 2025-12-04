@@ -15,6 +15,7 @@ public enum ApiErrorMessage {
     EMAIL_ALREADY_EXISTS("Email: %s already exists"),
     EMAIL_NOT_FOUND("Email: %s not found"),
     USER_ROLE_NOT_FOUND("User role not found"),
+    COMMENT_NOT_FOUND_BY_ID("Comment with ID: %s was not found"),
 
     INVALID_TOKEN_SIGNATURE("Invalid token signature"),
     ERROR_DURING_JWT_PROCESSING("An unexpected error occurred during JWT processing"),
