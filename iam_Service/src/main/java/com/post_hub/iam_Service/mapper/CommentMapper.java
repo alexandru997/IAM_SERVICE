@@ -2,6 +2,9 @@ package com.post_hub.iam_Service.mapper;
 
 import com.post_hub.iam_Service.model.dto.comment.CommentDTO;
 import com.post_hub.iam_Service.model.enteties.Comment;
+import com.post_hub.iam_Service.model.enteties.Post;
+import com.post_hub.iam_Service.model.enteties.User;
+import com.post_hub.iam_Service.model.request.comment.CommentRequest;
 import org.hibernate.type.descriptor.DateTimeUtils;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -19,4 +22,13 @@ public interface CommentMapper {
     @Mapping(source = "user.email", target = "owner.email")
     @Mapping(source = "post.id", target = "postId")
     CommentDTO toDto(Comment comment);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "created", ignore = true)
+    @Mapping(target = "updated", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "user", source = "user")
+    @Mapping(target = "post", source = "post")
+    @Mapping(target = "createdBy", source = "user.email")
+    Comment createComment(CommentRequest commentRequest, User user, Post post);
 }
