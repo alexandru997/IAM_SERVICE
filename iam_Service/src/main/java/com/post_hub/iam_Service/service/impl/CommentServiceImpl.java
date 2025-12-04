@@ -8,6 +8,7 @@ import com.post_hub.iam_Service.model.enteties.Post;
 import com.post_hub.iam_Service.model.enteties.User;
 import com.post_hub.iam_Service.model.exeption.NotFoundException;
 import com.post_hub.iam_Service.model.request.comment.CommentRequest;
+import com.post_hub.iam_Service.model.request.comment.UpdateCommentRequest;
 import com.post_hub.iam_Service.model.response.IamResponse;
 import com.post_hub.iam_Service.repositories.CommentRepository;
 import com.post_hub.iam_Service.repositories.PostRepository;
@@ -17,11 +18,7 @@ import com.post_hub.iam_Service.utils.APIUtils;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -54,6 +51,23 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentMapper.createComment(request, user, post);
         comment = commentRepository.save(comment);
         postRepository.save(post);
+
+        return IamResponse.createSuccessful(commentMapper.toDto(comment));
+    }
+
+    @Override
+    public IamResponse<CommentDTO> updateComment(@NotNull Integer commentId, UpdateCommentRequest request) {
+        Comment comment = commentRepository.findByIdAndDeletedFalse(commentId)
+                .orElseThrow(() -> new NotFoundException(ApiErrorMessage.COMMENT_NOT_FOUND_BY_ID.getMessage(commentId)));
+
+        if (request.getPostId() != null) {
+            Post post = postRepository.findByIdAndDeletedFalse(request.getPostId())
+                    .orElseThrow(() -> new NotFoundException(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(request.getPostId())));
+            comment.setPost(post);
+        }
+
+        commentMapper.updateComment(comment, request);
+        comment = commentRepository.save(comment);
 
         return IamResponse.createSuccessful(commentMapper.toDto(comment));
     }

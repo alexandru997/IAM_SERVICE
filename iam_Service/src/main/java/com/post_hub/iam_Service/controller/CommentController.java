@@ -3,6 +3,7 @@ package com.post_hub.iam_Service.controller;
 import com.post_hub.iam_Service.model.constants.ApiLogoMessage;
 import com.post_hub.iam_Service.model.dto.comment.CommentDTO;
 import com.post_hub.iam_Service.model.request.comment.CommentRequest;
+import com.post_hub.iam_Service.model.request.comment.UpdateCommentRequest;
 import com.post_hub.iam_Service.model.response.IamResponse;
 import com.post_hub.iam_Service.service.CommentService;
 import com.post_hub.iam_Service.utils.APIUtils;
@@ -36,6 +37,16 @@ public class CommentController {
         log.trace(ApiLogoMessage.NAME_OF_CURRENT_METHOD.getValue(), APIUtils.getMethodName());
 
         IamResponse<CommentDTO> response = commentService.createComment(commentRequest);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("${end.points.id}")
+    public ResponseEntity<IamResponse<CommentDTO>> updateComment(
+            @PathVariable(name = "id") Integer commentId,
+            @RequestBody @Valid UpdateCommentRequest commentRequest) {
+        log.trace(ApiLogoMessage.NAME_OF_CURRENT_METHOD.getValue(), APIUtils.getMethodName());
+
+        IamResponse<CommentDTO> response = commentService.updateComment(commentId, commentRequest);
         return ResponseEntity.ok(response);
     }
 }

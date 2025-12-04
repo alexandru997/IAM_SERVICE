@@ -5,9 +5,11 @@ import com.post_hub.iam_Service.model.enteties.Comment;
 import com.post_hub.iam_Service.model.enteties.Post;
 import com.post_hub.iam_Service.model.enteties.User;
 import com.post_hub.iam_Service.model.request.comment.CommentRequest;
+import com.post_hub.iam_Service.model.request.comment.UpdateCommentRequest;
 import org.hibernate.type.descriptor.DateTimeUtils;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(
@@ -31,4 +33,12 @@ public interface CommentMapper {
     @Mapping(target = "post", source = "post")
     @Mapping(target = "createdBy", source = "user.email")
     Comment createComment(CommentRequest commentRequest, User user, Post post);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "created", ignore = true)
+    @Mapping(target = "updated", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
+    @Mapping(target = "post", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    void updateComment(@MappingTarget Comment comment, UpdateCommentRequest commentRequest);
 }
