@@ -28,7 +28,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public IamResponse<CommentDTO> getCommentById(@NotNull Integer commentId) {
         Comment comment = commentRepository.findByIdAndDeletedFalse(commentId)
-                .orElseThrow(() -> new NotFoundException(ApiErrorMessage.COMMENT_NOT_FOUND_BY_ID.getMessage()));
+                .orElseThrow(() -> new NotFoundException(ApiErrorMessage.COMMENT_NOT_FOUND_BY_ID.getMessage(commentId)));
 
         return IamResponse.createSuccessful(commentMapper.toDto(comment));
     }
