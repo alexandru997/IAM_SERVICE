@@ -49,4 +49,13 @@ public class CommentController {
         IamResponse<CommentDTO> response = commentService.updateComment(commentId, commentRequest);
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("${end.points.id}")
+    public ResponseEntity<Void> softDeleteComment(
+            @PathVariable(name = "id") Integer commentId) {
+        log.trace(ApiLogoMessage.NAME_OF_CURRENT_METHOD.getValue(), APIUtils.getMethodName());
+
+        commentService.softDelete(commentId);
+        return ResponseEntity.ok().build();
+    }
 }
