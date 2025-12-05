@@ -3,6 +3,7 @@ package com.post_hub.iam_Service.service;
 import com.post_hub.iam_Service.model.dto.comment.CommentDTO;
 import com.post_hub.iam_Service.model.dto.comment.CommentSearchDTO;
 import com.post_hub.iam_Service.model.request.comment.CommentRequest;
+import com.post_hub.iam_Service.model.request.comment.CommentSearchRequest;
 import com.post_hub.iam_Service.model.request.comment.UpdateCommentRequest;
 import com.post_hub.iam_Service.model.response.IamResponse;
 import com.post_hub.iam_Service.model.response.PaginationResponse;
@@ -18,6 +19,8 @@ public interface CommentService {
 
     void softDelete(@NotNull Integer commentId);
     IamResponse<PaginationResponse<CommentSearchDTO>> findAllComments(Pageable pageable);
+    IamResponse<PaginationResponse<CommentSearchDTO>> searchComments(@NotNull CommentSearchRequest request, Pageable pageable);
+
 
 
 }

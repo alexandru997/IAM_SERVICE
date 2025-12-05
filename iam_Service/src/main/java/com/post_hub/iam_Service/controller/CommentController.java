@@ -4,6 +4,7 @@ import com.post_hub.iam_Service.model.constants.ApiLogoMessage;
 import com.post_hub.iam_Service.model.dto.comment.CommentDTO;
 import com.post_hub.iam_Service.model.dto.comment.CommentSearchDTO;
 import com.post_hub.iam_Service.model.request.comment.CommentRequest;
+import com.post_hub.iam_Service.model.request.comment.CommentSearchRequest;
 import com.post_hub.iam_Service.model.request.comment.UpdateCommentRequest;
 import com.post_hub.iam_Service.model.response.IamResponse;
 import com.post_hub.iam_Service.model.response.PaginationResponse;
@@ -72,6 +73,19 @@ public class CommentController {
         Pageable pageable = PageRequest.of(page, limit);
 
         IamResponse<PaginationResponse<CommentSearchDTO>> response = commentService.findAllComments(pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("${end.points.search}")
+    public ResponseEntity<IamResponse<PaginationResponse<CommentSearchDTO>>> searchComments(
+            @RequestBody @Valid CommentSearchRequest request,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "limit", defaultValue = "10") int limit) {
+        log.trace(ApiLogoMessage.NAME_OF_CURRENT_METHOD.getValue(), APIUtils.getMethodName());
+
+        Pageable pageable = PageRequest.of(page, limit);
+        IamResponse<PaginationResponse<CommentSearchDTO>> response = commentService.searchComments(request, pageable);
+
         return ResponseEntity.ok(response);
     }
 
