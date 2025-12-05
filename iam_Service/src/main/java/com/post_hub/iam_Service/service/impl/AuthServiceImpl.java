@@ -29,6 +29,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -48,6 +49,7 @@ public class AuthServiceImpl implements AuthService {
     private final AccessValidator accessValidator;
 
     @Override
+    @Transactional
     public IamResponse<UserProfileDTO> login(@NotNull LoginRequest request) {
         try {
             authenticationManager.authenticate(
@@ -68,6 +70,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public IamResponse<UserProfileDTO> refreshAccessToken(String refreshTokenValue) {
         RefreshToken refreshToken = refreshTokenService.validateAndRefreshToken(refreshTokenValue);
         User user = refreshToken.getUser();
@@ -79,6 +82,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public IamResponse<UserProfileDTO> registerUser(@NotNull RegistrationUserRequest request) {
         accessValidator.validateNewUser(
                 request.getUsername(),

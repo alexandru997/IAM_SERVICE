@@ -26,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -39,6 +40,7 @@ public class PostServiceImpl implements PostService {
     private final APIUtils apiUtils;
 
     @Override
+    @Transactional(readOnly = true)
     public IamResponse<PostDTO> getById(@NotNull Integer postId) {
         Post post = postRepository.findByIdAndDeletedFalse(postId)
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(postId)));
@@ -46,6 +48,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public IamResponse<PostDTO> createPost(@NotNull  PostRequest postRequest) {
         if (postRepository.existsByTitle(postRequest.getTitle())) {
             throw new DataExistException(ApiErrorMessage.POST_ALREADY_EXISTS.getMessage(postRequest.getTitle()));
@@ -62,6 +65,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public IamResponse<PostDTO> updatePost(@NotNull Integer postId, @NotNull UpdatePostRequest request) {
         Post post = postRepository.findByIdAndDeletedFalse(postId)
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(postId)));
@@ -77,6 +81,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional
     public void softDeletePost(Integer postId) {
         Post post = postRepository.findByIdAndDeletedFalse(postId)
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.POST_NOT_FOUND_BY_ID.getMessage(postId)));
@@ -86,6 +91,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public IamResponse<PaginationResponse<PostSearchDTO>> findAllPosts(Pageable pageable) {
         Page<PostSearchDTO> posts = postRepository.findAll(pageable)
                 .map(postMapper::toPostSearchDTO);
@@ -104,6 +110,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public IamResponse<PaginationResponse<PostSearchDTO>> searchPosts(PostSearchRequest request, Pageable pageable) {
         Specification<Post> specification = new PostSearchCriteria(request);
         Page<PostSearchDTO> posts = postRepository.findAll(specification, pageable)

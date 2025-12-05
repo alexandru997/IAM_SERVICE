@@ -9,6 +9,7 @@ import com.post_hub.iam_Service.service.model.RefreshTokenService;
 import com.post_hub.iam_Service.utils.APIUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -18,6 +19,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
+    @Transactional
     public RefreshToken generateOrUpdateRefreshToken(User user) {
         return refreshTokenRepository.findByUserId(user.getId())
                 .map(refreshToken -> {
@@ -35,6 +37,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     }
 
     @Override
+    @Transactional
     public RefreshToken validateAndRefreshToken(String requestRefreshToken) {
         RefreshToken refreshToken = refreshTokenRepository.findByToken(requestRefreshToken)
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.NOT_FOUND_REFRESH_TOKEN.getMessage()));
