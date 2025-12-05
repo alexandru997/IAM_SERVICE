@@ -30,6 +30,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -45,6 +46,7 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final AccessValidator accessValidator;
     @Override
+    @Transactional(readOnly = true)
     public IamResponse<UserDTO> getById(@NonNull Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(()-> new NotFoundException(ApiErrorMessage.USER_NOT_FOUND_BY_ID.getMessage(userId)));
@@ -53,6 +55,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public IamResponse<UserDTO> createUser(@NotNull NewUserRequest newUserRequest) {
 
         if (userRepository.existsByEmail(newUserRequest.getEmail())) {
@@ -77,6 +80,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public IamResponse<UserDTO> updateUser(@NotNull Integer userId, UpdateUserRequest request) {
         User user = userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.USER_NOT_FOUND_BY_ID.getMessage(userId)));
@@ -97,6 +101,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void softDeleteUser(Integer userId) {
         User user = userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.USER_NOT_FOUND_BY_ID.getMessage(userId)));
@@ -106,6 +111,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public IamResponse<PaginationResponse<UserSearchDTO>> findAllUsers(Pageable pageable) {
         Page<UserSearchDTO> users = userRepository.findAll(pageable)
                 .map(userMapper::toUserSearchDTO);
@@ -124,6 +130,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public IamResponse<PaginationResponse<UserSearchDTO>> searchUsers(UserSearchRequest request, Pageable pageable) {
         Specification<User> specification = new UserSearchCriteria(request);
 
