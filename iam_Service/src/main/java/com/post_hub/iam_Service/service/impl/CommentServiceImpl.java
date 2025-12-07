@@ -18,6 +18,7 @@ import com.post_hub.iam_Service.repositories.CommentRepository;
 import com.post_hub.iam_Service.repositories.PostRepository;
 import com.post_hub.iam_Service.repositories.UserRepository;
 import com.post_hub.iam_Service.repositories.criteria.CommentSearchCriteria;
+import com.post_hub.iam_Service.security.validation.AccessValidator;
 import com.post_hub.iam_Service.service.CommentService;
 import com.post_hub.iam_Service.utils.APIUtils;
 import jakarta.validation.constraints.NotNull;
@@ -26,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.data.domain.Pageable;
 
@@ -40,8 +42,10 @@ public class CommentServiceImpl implements CommentService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final PostMapper postMapper;
+    private final AccessValidator accessValidator;
 
     @Override
+    @Transactional(readOnly = true)
     public IamResponse<CommentDTO> getCommentById(@NotNull Integer commentId) {
         Comment comment = commentRepository.findByIdAndDeletedFalse(commentId)
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.COMMENT_NOT_FOUND_BY_ID.getMessage(commentId)));
@@ -50,6 +54,7 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public IamResponse<CommentDTO> createComment(@NotNull CommentRequest request) {
         Integer userId = apiUtils.getUserIdFromAuthentication();
         User user = userRepository.findById(userId)
@@ -66,10 +71,12 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public IamResponse<CommentDTO> updateComment(@NotNull Integer commentId, @NotNull UpdateCommentRequest request) {
 
         Comment comment = commentRepository.findByIdAndDeletedFalse(commentId)
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.COMMENT_NOT_FOUND_BY_ID.getMessage(commentId)));
+        accessValidator.validateAdminOrOwnerAccess(comment.getUser().getId());
 
         if (request.getPostId() != null) {
             Post post = postRepository.findByIdAndDeletedFalse(request.getPostId())
@@ -84,9 +91,11 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public void softDelete(@NotNull Integer commentId) {
         Comment comment = commentRepository.findByIdAndDeletedFalse(commentId)
                 .orElseThrow(() -> new NotFoundException(ApiErrorMessage.COMMENT_NOT_FOUND_BY_ID.getMessage(commentId)));
+        accessValidator.validateAdminOrOwnerAccess(comment.getUser().getId());
 
         comment.setDeleted(true);
         commentRepository.save(comment);
@@ -97,6 +106,7 @@ public class CommentServiceImpl implements CommentService {
         IamResponse.createSuccessful(postMapper.toPostDTO(post));
     }
     @Override
+    @Transactional(readOnly = true)
     public IamResponse<PaginationResponse<CommentSearchDTO>> findAllComments(Pageable pageable) {
         Page<CommentSearchDTO> comments = commentRepository.findAll(pageable)
                 .map(commentMapper::toCommentSearchDTO);
@@ -114,6 +124,7 @@ public class CommentServiceImpl implements CommentService {
         return IamResponse.createSuccessful(paginationResponse);
     }
     @Override
+    @Transactional(readOnly = true)
     public IamResponse<PaginationResponse<CommentSearchDTO>> searchComments(@NotNull CommentSearchRequest request, Pageable pageable) {
         Specification<Comment> specification = new CommentSearchCriteria(request);
 
