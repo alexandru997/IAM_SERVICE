@@ -4,9 +4,12 @@ import com.post_hub.iam_Service.security.filter.JwtRequestFilter;
 import com.post_hub.iam_Service.security.handler.AccessRestrictionHandler;
 import com.post_hub.iam_Service.service.UserService;
 import com.post_hub.iam_Service.service.model.IamServiceUserRole;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -74,5 +77,18 @@ public class SecurityConfig {
                 IamServiceUserRole.ADMIN.name()
         };
     }
+    @Bean
+    public OpenApiCustomizer jwtAuthCustomizer() {
+        return openApi ->
+                openApi.getComponents()
+                        .addSecuritySchemes(HttpHeaders.AUTHORIZATION,
+                                new SecurityScheme()
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("bearer")
+                                        .bearerFormat("JWT")
+                                        .in(SecurityScheme.In.HEADER)
+                                        .name(HttpHeaders.AUTHORIZATION));
+    }
+
 
 }

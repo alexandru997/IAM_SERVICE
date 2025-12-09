@@ -10,6 +10,7 @@ import com.post_hub.iam_Service.model.response.IamResponse;
 import com.post_hub.iam_Service.model.response.PaginationResponse;
 import com.post_hub.iam_Service.service.PostService;
 import com.post_hub.iam_Service.utils.APIUtils;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,7 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping("${end.point.id}")
+    @Operation(summary = "Get Post by ID", description = "Retrieves a post by its unique identifier")
     public ResponseEntity<IamResponse<PostDTO>> getPostById(
             @PathVariable(name = "id") Integer postId) {
         log.trace(ApiLogoMessage.NAME_OF_CURRENT_METHOD.getValue(), APIUtils.getMethodName());
@@ -39,6 +41,7 @@ public class PostController {
     }
 
     @PostMapping("${end.points.create}")
+    @Operation(summary = "Create a new Post", description = "Adds a new post to the system")
     public ResponseEntity<IamResponse<PostDTO>> createPost(
             @RequestBody @Valid PostRequest postRequest) {
         log.trace(ApiLogoMessage.NAME_OF_CURRENT_METHOD.getValue(), APIUtils.getMethodName());
@@ -47,6 +50,7 @@ public class PostController {
     }
 
     @PutMapping("${end.point.id}")
+    @Operation(summary = "Update a Post", description = "Updates an existing post by its ID")
     public ResponseEntity<IamResponse<PostDTO>> updatePost(
             @PathVariable(name = "id") Integer postId,
             @RequestBody @Valid UpdatePostRequest updatePostRequest) {
@@ -56,6 +60,7 @@ public class PostController {
     }
 
     @DeleteMapping("${end.point.id}")
+    @Operation(summary = "Delete a Post", description = "Marks a post as deleted without removing it from the database")
     public ResponseEntity<Void> softDeletePost(
             @PathVariable(name = "id") Integer postId) {
         log.trace(ApiLogoMessage.NAME_OF_CURRENT_METHOD.getValue(), APIUtils.getMethodName());
@@ -64,6 +69,7 @@ public class PostController {
     }
 
     @GetMapping("${end.points.all}")
+    @Operation(summary = "Get all Posts", description = "Retrieves a paginated list of all posts")
     public ResponseEntity<IamResponse<PaginationResponse<PostSearchDTO>>> getAllPosts(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "limit", defaultValue = "10") int limit)
@@ -77,6 +83,7 @@ public class PostController {
     }
 
     @PostMapping("${end.points.search}")
+    @Operation(summary = "Search Posts", description = "Searches for posts based on filters and pagination")
     public ResponseEntity<IamResponse<PaginationResponse<PostSearchDTO>>> searchPost(
             @RequestBody @Valid PostSearchRequest request,
             @RequestParam(name = "page", defaultValue = "0") int page,

@@ -2,6 +2,7 @@ package com.post_hub.iam_Service.config;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
@@ -20,8 +21,18 @@ import java.util.Objects;
 @Configuration
 @OpenAPIDefinition(
         info = @Info(
-                title = "POST_HUB REST API",
-                version = "1.0"
+                title = "'POST_HUB' REST API",
+                version = "1.0",
+                description = """
+                        'IAM-service' - is the authentication and registration service. It allows users to:
+                        - Authenticate
+                        - Register
+                        - Create new users
+                        - Create posts
+                        - Write comments to posts
+
+                        Created by Alexandru Besliu | [Send me email](mailto:besliualexandru33@gmail.com)""",
+                contact = @Contact(name = "POST_HUB")
         ),
         security = { @SecurityRequirement(name = HttpHeaders.AUTHORIZATION) }
 )
