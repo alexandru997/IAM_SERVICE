@@ -10,6 +10,7 @@ import com.post_hub.iam_Service.model.response.IamResponse;
 import com.post_hub.iam_Service.model.response.PaginationResponse;
 import com.post_hub.iam_Service.service.UserService;
 import com.post_hub.iam_Service.utils.APIUtils;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("${end.point.id}")
+    @Operation(summary = "Get User by ID", description = "Retrieves user details by their unique identifier")
     public ResponseEntity<IamResponse<UserDTO>> getUserById(
             @PathVariable(name = "id") Integer userId) {
         log.trace(ApiLogoMessage.NAME_OF_CURRENT_METHOD.getValue(), APIUtils.getMethodName());
@@ -37,6 +39,7 @@ public class UserController {
     }
 
     @PostMapping("${end.points.create}")
+    @Operation(summary = "Create a new User [only for Admins]", description = "Registers a new user in the system")
     public ResponseEntity<IamResponse<UserDTO>> createUser(
             @RequestBody @Valid NewUserRequest request) {
         log.trace(ApiLogoMessage.NAME_OF_CURRENT_METHOD.getValue(), APIUtils.getMethodName());
@@ -46,6 +49,7 @@ public class UserController {
     }
 
     @PutMapping("${end.point.id}")
+    @Operation(summary = "Update User", description = "Updates an existing user by their ID")
     public ResponseEntity<IamResponse<UserDTO>> updateUserById(
             @PathVariable(name = "id") Integer userId,
             @RequestBody @Valid UpdateUserRequest request) {
@@ -56,6 +60,7 @@ public class UserController {
     }
 
     @DeleteMapping("${end.point.id}")
+    @Operation(summary = "Delete User", description = "Marks a user as deleted without removing them from the database")
     public ResponseEntity<Void> softDeleteUser(
             @PathVariable(name = "id") Integer userId
     ) {
@@ -66,6 +71,7 @@ public class UserController {
     }
 
     @GetMapping("${end.points.all}")
+    @Operation(summary = "Get all Users", description = "Retrieves a paginated list of all registered users")
     public ResponseEntity<IamResponse<PaginationResponse<UserSearchDTO>>> getAllUsers(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "limit", defaultValue = "10") int limit) {
@@ -77,6 +83,7 @@ public class UserController {
     }
 
     @PostMapping("${end.points.search}")
+    @Operation(summary = "Search Users", description = "Filters users based on search criteria and pagination settings")
     public ResponseEntity<IamResponse<PaginationResponse<UserSearchDTO>>> searchUsers(
             @RequestBody @Valid UserSearchRequest request,
             @RequestParam(name = "page", defaultValue = "0") int page,
