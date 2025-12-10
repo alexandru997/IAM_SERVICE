@@ -7,12 +7,14 @@ import com.post_hub.iam_Service.model.enteties.User;
 import com.post_hub.iam_Service.model.enums.RegistrationStatus;
 import com.post_hub.iam_Service.model.exception.InvalidDataException;
 import com.post_hub.iam_Service.model.request.user.LoginRequest;
+import com.post_hub.iam_Service.model.request.user.RegistrationUserRequest;
 import com.post_hub.iam_Service.model.response.IamResponse;
 import com.post_hub.iam_Service.repositories.RoleRepository;
 import com.post_hub.iam_Service.repositories.UserRepository;
 import com.post_hub.iam_Service.security.JwtTokenProvider;
 import com.post_hub.iam_Service.security.validation.AccessValidator;
 import com.post_hub.iam_Service.service.impl.AuthServiceImpl;
+import com.post_hub.iam_Service.service.model.IamServiceUserRole;
 import com.post_hub.iam_Service.service.model.RefreshTokenService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -137,5 +139,50 @@ public class AuthServiceTest {
         verify(userRepository, never()).findUserByEmailAndDeletedFalse(request.getEmail());
         verify(refreshTokenService, never()).generateOrUpdateRefreshToken(any(User.class));
         verify(jwtTokenProvider, never()).generateToken(any(User.class));
+    }
+
+
+    @Test
+    void registerUser_ValidRequest_CreatesUserSuccessfully() {
+        RegistrationUserRequest request = new RegistrationUserRequest(
+                "newUser",
+                "newuser@gmail.com",
+                "password123!",
+                "password123!"
+        );
+
+        doNothing().when(accessValidator).validateNewUser(
+                request.getUsername(),
+                request.getEmail(),
+                request.getPassword(),
+                request.getConfirmPassword()
+        );
+
+        when(roleRepository.findByName(IamServiceUserRole.USER.getRole())).thenReturn(Optional.of(userRole));
+        when(userMapper.fromDto(request)).thenReturn(testUser);
+        when(passwordEncoder.encode(request.getPassword())).thenReturn("hashedPassword");
+        when(userRepository.save(any(User.class))).thenReturn(testUser);
+        when(refreshTokenService.generateOrUpdateRefreshToken(testUser)).thenReturn(testRefreshToken);
+        when(jwtTokenProvider.generateToken(testUser)).thenReturn("access_token_123");
+        when(userMapper.toUserProfileDto(testUser, "access_token_123", testRefreshToken.getToken()))
+                .thenReturn(testUserProfileDTO);
+
+        IamResponse<UserProfileDTO> result = authService.registerUser(request);
+
+        assertNotNull(result);
+        assertEquals("access_token_123", result.getPayload().getToken());
+        assertEquals("refresh_token_123", result.getPayload().getRefreshToken());
+
+        verify(accessValidator, times(1)).validateNewUser(
+                request.getUsername(),
+                request.getEmail(),
+                request.getPassword(),
+                request.getConfirmPassword()
+        );
+        verify(roleRepository, times(1)).findByName(IamServiceUserRole.USER.getRole());
+        verify(userRepository, times(1)).save(any(User.class));
+        verify(refreshTokenService, times(1)).generateOrUpdateRefreshToken(testUser);
+        verify(jwtTokenProvider, times(1)).generateToken(testUser);
+        verify(userMapper, times(1)).toUserProfileDto(testUser, "access_token_123", testRefreshToken.getToken());
     }
 }
