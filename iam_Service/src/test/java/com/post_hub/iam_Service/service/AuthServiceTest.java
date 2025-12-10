@@ -5,6 +5,9 @@ import com.post_hub.iam_Service.model.enteties.RefreshToken;
 import com.post_hub.iam_Service.model.enteties.Role;
 import com.post_hub.iam_Service.model.enteties.User;
 import com.post_hub.iam_Service.model.enums.RegistrationStatus;
+import com.post_hub.iam_Service.model.exception.InvalidDataException;
+import com.post_hub.iam_Service.model.request.user.LoginRequest;
+import com.post_hub.iam_Service.model.response.IamResponse;
 import com.post_hub.iam_Service.repositories.RoleRepository;
 import com.post_hub.iam_Service.repositories.UserRepository;
 import com.post_hub.iam_Service.security.JwtTokenProvider;
@@ -12,16 +15,24 @@ import com.post_hub.iam_Service.security.validation.AccessValidator;
 import com.post_hub.iam_Service.service.impl.AuthServiceImpl;
 import com.post_hub.iam_Service.service.model.RefreshTokenService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
@@ -87,5 +98,44 @@ public class AuthServiceTest {
                 testRefreshToken.getToken(),
                 Collections.emptyList()
         );
+    }
+    @Test
+    void login_ValidCredentials_ReturnsUserProfile() {
+        LoginRequest request = new LoginRequest("test@gmail.com", "password123");
+
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(null);
+        when(userRepository.findUserByEmailAndDeletedFalse(request.getEmail())).thenReturn(Optional.of(testUser));
+        when(refreshTokenService.generateOrUpdateRefreshToken(testUser)).thenReturn(testRefreshToken);
+        when(jwtTokenProvider.generateToken(testUser)).thenReturn("access_token_123");
+        when(userMapper.toUserProfileDto(testUser, "access_token_123", testRefreshToken.getToken()))
+                .thenReturn(testUserProfileDTO);
+
+        IamResponse<UserProfileDTO> result = authService.login(request);
+
+        assertNotNull(result);
+        assertEquals("access_token_123", result.getPayload().getToken());
+        assertEquals("refresh_token_123", result.getPayload().getRefreshToken());
+
+        verify(authenticationManager, times(1)).authenticate(any(UsernamePasswordAuthenticationToken.class));
+        verify(userRepository, times(1)).findUserByEmailAndDeletedFalse(request.getEmail());
+        verify(refreshTokenService, times(1)).generateOrUpdateRefreshToken(testUser);
+        verify(jwtTokenProvider, times(1)).generateToken(testUser);
+        verify(userMapper, times(1)).toUserProfileDto(testUser, "access_token_123", testRefreshToken.getToken());
+    }
+
+    @Test
+    void login_InvalidCredentials_ThrowsException() {
+        LoginRequest request = new LoginRequest("test@gmail.com", "wrongPassword");
+
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenThrow(new BadCredentialsException("Invalid credentials"));
+
+        InvalidDataException exception = assertThrows(InvalidDataException.class, () -> authService.login(request));
+
+        assertTrue(exception.getMessage().contains("Invalid"));
+
+        verify(userRepository, never()).findUserByEmailAndDeletedFalse(request.getEmail());
+        verify(refreshTokenService, never()).generateOrUpdateRefreshToken(any(User.class));
+        verify(jwtTokenProvider, never()).generateToken(any(User.class));
     }
 }
