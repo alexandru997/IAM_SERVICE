@@ -1,0 +1,91 @@
+package com.post_hub.iam_Service.service;
+import com.post_hub.iam_Service.mapper.UserMapper;
+import com.post_hub.iam_Service.model.dto.user.UserProfileDTO;
+import com.post_hub.iam_Service.model.enteties.RefreshToken;
+import com.post_hub.iam_Service.model.enteties.Role;
+import com.post_hub.iam_Service.model.enteties.User;
+import com.post_hub.iam_Service.model.enums.RegistrationStatus;
+import com.post_hub.iam_Service.repositories.RoleRepository;
+import com.post_hub.iam_Service.repositories.UserRepository;
+import com.post_hub.iam_Service.security.JwtTokenProvider;
+import com.post_hub.iam_Service.security.validation.AccessValidator;
+import com.post_hub.iam_Service.service.impl.AuthServiceImpl;
+import com.post_hub.iam_Service.service.model.RefreshTokenService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import java.time.LocalDateTime;
+import java.util.Collections;
+
+@ExtendWith(MockitoExtension.class)
+@TestInstance(TestInstance.Lifecycle.PER_METHOD)
+public class AuthServiceTest {
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private UserMapper userMapper;
+
+    @Mock
+    private JwtTokenProvider jwtTokenProvider;
+
+    @Mock
+    private AuthenticationManager authenticationManager;
+
+    @Mock
+    private RefreshTokenService refreshTokenService;
+
+    @Mock
+    private RoleRepository roleRepository;
+
+    @Mock
+    private BCryptPasswordEncoder passwordEncoder;
+
+    @Mock
+    private AccessValidator accessValidator;
+
+    @InjectMocks
+    private AuthServiceImpl authService;
+
+    private User testUser;
+    private UserProfileDTO testUserProfileDTO;
+    private RefreshToken testRefreshToken;
+    private Role userRole;
+
+    @BeforeEach
+    void setUp() {
+        testUser = new User();
+        testUser.setId(1);
+        testUser.setUsername("TestUser");
+        testUser.setEmail("test@gmail.com");
+        testUser.setPassword("hashedPassword");
+        testUser.setRegistrationStatus(RegistrationStatus.ACTIVE);
+        testUser.setLastLogin(LocalDateTime.now());
+
+        userRole = new Role();
+        userRole.setName("USER");
+        testUser.setRoles(Collections.singleton(userRole));
+
+        testRefreshToken  = new RefreshToken();
+        testRefreshToken.setToken("refresh_token_123");
+        testRefreshToken.setUser(testUser);
+
+        testUserProfileDTO = new UserProfileDTO(
+                testUser.getId(),
+                testUser.getUsername(),
+                testUser.getEmail(),
+                testUser.getRegistrationStatus(),
+                testUser.getLastLogin(),
+                "access_token_123",
+                testRefreshToken.getToken(),
+                Collections.emptyList()
+        );
+    }
+}
