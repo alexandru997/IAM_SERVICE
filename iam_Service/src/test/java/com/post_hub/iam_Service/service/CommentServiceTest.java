@@ -5,17 +5,23 @@ import com.post_hub.iam_Service.model.dto.comment.CommentDTO;
 import com.post_hub.iam_Service.model.enteties.Comment;
 import com.post_hub.iam_Service.model.enteties.Post;
 import com.post_hub.iam_Service.model.enteties.User;
+import com.post_hub.iam_Service.model.exeption.NotFoundException;
 import com.post_hub.iam_Service.repositories.CommentRepository;
 import com.post_hub.iam_Service.repositories.PostRepository;
 import com.post_hub.iam_Service.repositories.UserRepository;
 import com.post_hub.iam_Service.service.impl.CommentServiceImpl;
 import com.post_hub.iam_Service.utils.APIUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
@@ -63,5 +69,33 @@ public class CommentServiceTest {
         testCommentDTO = new CommentDTO();
         testCommentDTO.setId(1);
         testCommentDTO.setMessage("Test Comment");
+    }
+
+
+    @Test
+    void getCommentById_CommentExists_ReturnsCommentDTO() {
+        when(commentRepository.findByIdAndDeletedFalse(1)).thenReturn(Optional.of(tesComment));
+        when(commentMapper.toDto(tesComment)).thenReturn(testCommentDTO);
+
+        CommentDTO result = commentService.getCommentById(1).getPayload();
+
+        assertNotNull(result);
+        assertEquals(testCommentDTO.getId(), result.getId());
+        assertEquals(testCommentDTO.getMessage(), result.getMessage());
+
+        verify(commentRepository, times(1)).findByIdAndDeletedFalse(1);
+        verify(commentMapper, times(1)).toDto(tesComment);
+    }
+
+    @Test
+    void getCommentById_CommentNotFound_ThrowsException() {
+        when(commentRepository.findByIdAndDeletedFalse(999)).thenReturn(Optional.empty());
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> commentService.getCommentById(999));
+
+        assertTrue(exception.getMessage().contains("not found"));
+
+        verify(commentRepository, times(1)).findByIdAndDeletedFalse(999);
+        verify(commentMapper, never()).toDto(any(Comment.class));
     }
 }
