@@ -1,16 +1,21 @@
 package com.post_hub.iam_Service.integration;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.post_hub.iam_Service.IamServiceApplication;
+import com.post_hub.iam_Service.model.dto.user.UserDTO;
 import com.post_hub.iam_Service.model.enteties.User;
 import com.post_hub.iam_Service.model.exception.InvalidDataException;
 import com.post_hub.iam_Service.model.request.user.NewUserRequest;
 import com.post_hub.iam_Service.model.request.user.UpdateUserRequest;
+import com.post_hub.iam_Service.model.response.IamResponse;
 import com.post_hub.iam_Service.repositories.UserRepository;
 import com.post_hub.iam_Service.security.JwtTokenProvider;
 import jakarta.transaction.Transactional;
 import lombok.Setter;
 import org.hibernate.Hibernate;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -24,8 +29,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import java.io.IOException;
+import java.util.Objects;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -89,13 +98,22 @@ public class UserControllerTest {
                 "password123",
                 "newuser@gmail.com");
 
-        mockMvc.perform(MockMvcRequestBuilders
+        MvcResult requestResult = mockMvc.perform(MockMvcRequestBuilders
                         .post("/users/create")
                         .header(HttpHeaders.AUTHORIZATION, adminJwt)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsBytes(request))
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+
+        IamResponse<UserDTO> response = parseUserDTOResponse(requestResult.getResponse().getContentAsByteArray());
+
+        UserDTO resultBody = Objects.nonNull(response.getPayload()) ? response.getPayload() : null;
+        Assertions.assertTrue(response.isSuccess());
+        Assertions.assertNotNull(resultBody);
+        Assertions.assertEquals(request.getEmail(), resultBody.getEmail());
+        Assertions.assertEquals(request.getUsername(), resultBody.getUsername());
     }
 
     @Test
@@ -147,5 +165,14 @@ public class UserControllerTest {
                         .header(HttpHeaders.AUTHORIZATION, userJwt)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
+
+    private IamResponse<UserDTO> parseUserDTOResponse(byte[] contentAsByteArray) {
+        try {
+            objectMapper.registerModule(new JavaTimeModule());
+            return objectMapper.readValue(contentAsByteArray, new TypeReference<>() {});
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
