@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
-public class PostServiceTest {
+class PostServiceTest {
 
     @Mock
     private PostRepository postRepository;
