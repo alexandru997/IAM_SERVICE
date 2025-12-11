@@ -38,7 +38,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
-public class AuthServiceTest {
+class AuthServiceTest {
 
     @Mock
     private UserRepository userRepository;

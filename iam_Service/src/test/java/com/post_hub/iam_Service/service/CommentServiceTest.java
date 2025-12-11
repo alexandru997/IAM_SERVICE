@@ -26,7 +26,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
-public class CommentServiceTest {
+class CommentServiceTest {
 
     @Mock
     private CommentRepository commentRepository;
