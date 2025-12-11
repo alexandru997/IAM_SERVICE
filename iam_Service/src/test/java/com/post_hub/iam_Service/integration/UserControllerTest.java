@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.post_hub.iam_Service.IamServiceApplication;
 import com.post_hub.iam_Service.model.enteties.User;
 import com.post_hub.iam_Service.model.exception.InvalidDataException;
+import com.post_hub.iam_Service.model.request.user.NewUserRequest;
+import com.post_hub.iam_Service.model.request.user.UpdateUserRequest;
 import com.post_hub.iam_Service.repositories.UserRepository;
 import com.post_hub.iam_Service.security.JwtTokenProvider;
 import jakarta.transaction.Transactional;
@@ -69,5 +71,81 @@ public class UserControllerTest {
                         .header(HttpHeaders.AUTHORIZATION, adminJwt)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+
+    @Test
+    void getAllUsers_Unauthorized_401() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/users/all"))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
+
+    @Test
+    @Transactional
+    void createUser_AsAdmin_OK_200() throws Exception {
+        NewUserRequest request = new NewUserRequest(
+                "newUser",
+                "password123",
+                "newuser@gmail.com");
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/users/create")
+                        .header(HttpHeaders.AUTHORIZATION, adminJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(request))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    @Transactional
+    void createUser_asUser_Unauthorized_401() throws Exception {
+        NewUserRequest request = new NewUserRequest(
+                "newUser",
+                "password123",
+                "newuser@gmail.com");
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/users/create")
+                        .header(HttpHeaders.AUTHORIZATION, userJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(request))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+    }
+
+    @Test
+    @Transactional
+    void updateUser_AsAdmin_OK_200() throws Exception {
+        UpdateUserRequest request = new UpdateUserRequest("updates_username", "updatedUser@gmail.com", null);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .put("/users/1")
+                        .header(HttpHeaders.AUTHORIZATION, adminJwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsBytes(request))
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    @Transactional
+    void deleteUser_AsAdmin_200_OK() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/users/1")
+                        .header(HttpHeaders.AUTHORIZATION, adminJwt)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    @Transactional
+    void deleteUser_AsUser_Unauthorized_401() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/users/1")
+                        .header(HttpHeaders.AUTHORIZATION, userJwt)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isUnauthorized());
     }
 }
