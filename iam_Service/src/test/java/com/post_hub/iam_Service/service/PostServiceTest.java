@@ -1,5 +1,6 @@
 package com.post_hub.iam_Service.service;
 
+import com.post_hub.iam_Service.kafka.service.KafkaMessageService;
 import com.post_hub.iam_Service.mapper.PostMapper;
 import com.post_hub.iam_Service.model.dto.post.PostDTO;
 import com.post_hub.iam_Service.model.enteties.Post;
@@ -38,6 +39,8 @@ class PostServiceTest {
 
     @Mock
     private APIUtils apiUtils;
+    @Mock
+    private KafkaMessageService kafkaMessageService;
 
     @InjectMocks
     private PostServiceImpl postService;
@@ -112,5 +115,7 @@ class PostServiceTest {
         verify(userRepository, times(1)).findById(testUser.getId());
         verify(postRepository, times(1)).save(any(Post.class));
         verify(postMapper, times(1)).toPostDTO(any(Post.class));
+        verify(kafkaMessageService, times(1)).sendPostCreatedMessage(testUser.getId(), testPost.getId());
+
     }
 }

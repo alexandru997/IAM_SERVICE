@@ -1,5 +1,6 @@
 package com.post_hub.iam_Service.service;
 
+import com.post_hub.iam_Service.kafka.service.KafkaMessageService;
 import com.post_hub.iam_Service.mapper.UserMapper;
 import com.post_hub.iam_Service.model.dto.user.UserDTO;
 import com.post_hub.iam_Service.model.enteties.Role;
@@ -52,6 +53,8 @@ class UserServiceTest {
 
     @Mock
     private RoleRepository roleRepository;
+    @Mock
+    private KafkaMessageService kafkaMessageService;
 
     @Mock
     private AccessValidator accessValidator;
@@ -244,6 +247,7 @@ class UserServiceTest {
         when(roleRepository.findByName(IamServiceUserRole.USER.getRole())).thenReturn(Optional.of(superAdminRole));
 
         User newUser = new User();
+        newUser.setId(1);
         newUser.setUsername(request.getUsername());
         newUser.setEmail(request.getEmail());
         newUser.setPassword("encodedPassword");
@@ -265,6 +269,8 @@ class UserServiceTest {
         verify(userRepository, times(1)).existsByUsername(request.getUsername());
         verify(userRepository, times(1)).save(any(User.class));
         verify(userMapper, times(1)).toDto(newUser);
+        verify(kafkaMessageService, times(1)).sendUserCreatedMessage(newUser.getId(), newUser.getUsername());
+
     }
 
     @Test

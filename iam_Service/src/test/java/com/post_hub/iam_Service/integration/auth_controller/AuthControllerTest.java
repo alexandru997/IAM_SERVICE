@@ -2,9 +2,11 @@ package com.post_hub.iam_Service.integration.auth_controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.post_hub.iam_Service.IamServiceApplication;
+import com.post_hub.iam_Service.model.enteties.User;
 import com.post_hub.iam_Service.model.request.user.LoginRequest;
 import com.post_hub.iam_Service.model.request.user.RegistrationUserRequest;
 import com.post_hub.iam_Service.model.response.IamResponse;
+import com.post_hub.iam_Service.repositories.UserRepository;
 import lombok.Setter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Order;
@@ -18,6 +20,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -38,13 +41,24 @@ public class AuthControllerTest {
     @Setter
     private MockMvc mvc;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     @Order(1)
+    @Transactional
     void loginUserAsSuperAdmin_OK_200() throws Exception {
-        // Подготавливаем запрос с существующими пользователем
-        LoginRequest request = new LoginRequest("superadmin@gmail.com", "Test11111");
+        // Update password for test user to known value
+        User superAdmin = userRepository.findById(1).orElseThrow();
+        superAdmin.setPassword(passwordEncoder.encode("Test11111"));
+        userRepository.save(superAdmin);
+
+        LoginRequest request = new LoginRequest("super_admin@gmail.com", "Test11111");
 
         MvcResult requestResult = mvc.perform(MockMvcRequestBuilders
                         .post("/auth/login")

@@ -37,10 +37,7 @@ import org.springframework.web.bind.annotation.*;
     })
 
     @PostMapping("${end.points.login}")
-    @Operation(
-            summary = "User login",
-            description = "Authenticates the user and returns an access/refresh token"
-    )
+    @Operation(summary = "User login", description = "Authenticates the user and returns an access/refresh token")
     public ResponseEntity<?> login(
             @RequestBody @Valid LoginRequest request,
             HttpServletResponse response) {
