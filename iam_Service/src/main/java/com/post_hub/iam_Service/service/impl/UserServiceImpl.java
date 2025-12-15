@@ -1,5 +1,6 @@
 package com.post_hub.iam_Service.service.impl;
 
+import com.post_hub.iam_Service.kafka.service.KafkaMessageService;
 import com.post_hub.iam_Service.mapper.UserMapper;
 import com.post_hub.iam_Service.model.constants.ApiErrorMessage;
 import com.post_hub.iam_Service.model.dto.user.UserDTO;
@@ -45,6 +46,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
     private final AccessValidator accessValidator;
+    private final KafkaMessageService kafkaMessageService;
     @Override
     @Transactional(readOnly = true)
     public IamResponse<UserDTO> getById(@NonNull Integer userId) {
@@ -76,6 +78,7 @@ public class UserServiceImpl implements UserService {
         roles.add(userRole);
         user.setRoles(roles);
         User savedUser = userRepository.save(user);
+        kafkaMessageService.sendUserCreatedMessage(savedUser.getId(), savedUser.getUsername());
         return IamResponse.createSuccessful(userMapper.toDto(savedUser));
     }
 

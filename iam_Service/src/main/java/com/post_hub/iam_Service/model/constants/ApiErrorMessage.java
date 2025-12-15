@@ -33,6 +33,8 @@ public enum ApiErrorMessage {
             + ApiConstants.REQUIRED_MIN_CHARACTERS_NUMBER_IN_PASSWORD + " character(s), "
             + ApiConstants.REQUIRED_MIN_DIGITS_NUMBER_IN_PASSWORD + " digit(s). "),
     HAVE_NO_ACCESS("You don't have the necessary permissions"),
+    KAFKA_SEND_FAILED("Kafka message didn't send."),
+
 
     ;
 

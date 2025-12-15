@@ -1,5 +1,6 @@
 package com.post_hub.iam_Service.service;
 
+import com.post_hub.iam_Service.kafka.service.KafkaMessageService;
 import com.post_hub.iam_Service.mapper.CommentMapper;
 import com.post_hub.iam_Service.model.dto.comment.CommentDTO;
 import com.post_hub.iam_Service.model.enteties.Comment;
@@ -42,6 +43,8 @@ class CommentServiceTest {
 
     @Mock
     private APIUtils apiUtils;
+    @Mock
+    private KafkaMessageService kafkaMessageService;
 
     @InjectMocks
     private CommentServiceImpl commentService;
@@ -120,5 +123,7 @@ class CommentServiceTest {
         verify(postRepository, times(1)).findByIdAndDeletedFalse(testPost.getId());
         verify(commentRepository, times(1)).save(any(Comment.class));
         verify(commentMapper, times(1)).toDto(any(Comment.class));
+        verify(kafkaMessageService, times(1)).sendCommentCreatedMessage(testUser.getId(), testPost.getId());
+
     }
 }
