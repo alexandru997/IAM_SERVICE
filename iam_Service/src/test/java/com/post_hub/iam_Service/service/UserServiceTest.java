@@ -59,7 +59,6 @@ class UserServiceTest {
     @Mock
     private AccessValidator accessValidator;
 
-    @InjectMocks
     private UserServiceImpl userService;
 
     private User testUser;
@@ -69,6 +68,15 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
+        userService = new UserServiceImpl(
+                userRepository,
+                userMapper,
+                passwordEncoder,
+                roleRepository,
+                accessValidator,
+                Optional.of(kafkaMessageService)
+        );
+
         userRole = new Role();
         userRole.setName(IamServiceUserRole.USER.getRole());
 

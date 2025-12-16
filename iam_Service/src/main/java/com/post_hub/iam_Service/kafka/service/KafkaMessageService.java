@@ -7,10 +7,12 @@ import com.post_hub.iam_Service.model.constants.ApiKafkaMessage;
 import com.post_hub.iam_Service.kafka.MessageProducer;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "kafka.enabled", havingValue = "true")
 public class KafkaMessageService {
     private final MessageProducer messageProducer;
 

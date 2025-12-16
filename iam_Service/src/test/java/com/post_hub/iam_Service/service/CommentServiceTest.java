@@ -43,10 +43,16 @@ class CommentServiceTest {
 
     @Mock
     private APIUtils apiUtils;
+
     @Mock
     private KafkaMessageService kafkaMessageService;
 
-    @InjectMocks
+    @Mock
+    private com.post_hub.iam_Service.mapper.PostMapper postMapper;
+
+    @Mock
+    private com.post_hub.iam_Service.security.validation.AccessValidator accessValidator;
+
     private CommentServiceImpl commentService;
 
     private Comment tesComment;
@@ -56,6 +62,17 @@ class CommentServiceTest {
 
     @BeforeEach
     void setUp() {
+        commentService = new CommentServiceImpl(
+                commentRepository,
+                commentMapper,
+                apiUtils,
+                userRepository,
+                postRepository,
+                postMapper,
+                accessValidator,
+                Optional.of(kafkaMessageService)
+        );
+
         testUser = new User();
         testUser.setId(1);
         testUser.setUsername("TestUser");

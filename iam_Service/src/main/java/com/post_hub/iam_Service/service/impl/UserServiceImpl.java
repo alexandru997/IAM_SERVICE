@@ -35,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -46,7 +47,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
     private final AccessValidator accessValidator;
-    private final KafkaMessageService kafkaMessageService;
+    private final Optional<KafkaMessageService> kafkaMessageService;
     @Override
     @Transactional(readOnly = true)
     public IamResponse<UserDTO> getById(@NonNull Integer userId) {
@@ -78,7 +79,7 @@ public class UserServiceImpl implements UserService {
         roles.add(userRole);
         user.setRoles(roles);
         User savedUser = userRepository.save(user);
-        kafkaMessageService.sendUserCreatedMessage(savedUser.getId(), savedUser.getUsername());
+        kafkaMessageService.ifPresent(service -> service.sendUserCreatedMessage(savedUser.getId(), savedUser.getUsername()));
         return IamResponse.createSuccessful(userMapper.toDto(savedUser));
     }
 
