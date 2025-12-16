@@ -32,6 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.data.domain.Pageable;
 
+import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -44,7 +46,7 @@ public class CommentServiceImpl implements CommentService {
     private final PostRepository postRepository;
     private final PostMapper postMapper;
     private final AccessValidator accessValidator;
-    private final KafkaMessageService kafkaMessageService;
+    private final Optional<KafkaMessageService> kafkaMessageService;
 
     @Override
     @Transactional(readOnly = true)
@@ -68,7 +70,8 @@ public class CommentServiceImpl implements CommentService {
         Comment comment = commentMapper.createComment(request, user, post);
         comment = commentRepository.save(comment);
         postRepository.save(post);
-        kafkaMessageService.sendCommentCreatedMessage(user.getId(), comment.getId());
+        Comment finalComment = comment;
+        kafkaMessageService.ifPresent(service -> service.sendCommentCreatedMessage(user.getId(), finalComment.getId()));
 
 
         return IamResponse.createSuccessful(commentMapper.toDto(comment));
@@ -90,7 +93,8 @@ public class CommentServiceImpl implements CommentService {
 
         commentMapper.updateComment(comment, request);
         comment = commentRepository.save(comment);
-        kafkaMessageService.sendCommentUpdatedMessage(comment.getUser().getId(), comment.getId(), comment.getMessage());
+        Comment finalComment = comment;
+        kafkaMessageService.ifPresent(service -> service.sendCommentUpdatedMessage(finalComment.getUser().getId(), finalComment.getId(), finalComment.getMessage()));
 
 
         return IamResponse.createSuccessful(commentMapper.toDto(comment));
@@ -108,7 +112,7 @@ public class CommentServiceImpl implements CommentService {
 
         Post post = comment.getPost();
         postRepository.save(post);
-        kafkaMessageService.sendCommentDeletedMessage(comment.getUser().getId(), comment.getId());
+        kafkaMessageService.ifPresent(service -> service.sendCommentDeletedMessage(comment.getUser().getId(), comment.getId()));
 
         IamResponse.createSuccessful(postMapper.toPostDTO(post));
     }

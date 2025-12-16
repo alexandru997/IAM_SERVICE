@@ -39,10 +39,13 @@ class PostServiceTest {
 
     @Mock
     private APIUtils apiUtils;
+
     @Mock
     private KafkaMessageService kafkaMessageService;
 
-    @InjectMocks
+    @Mock
+    private com.post_hub.iam_Service.security.validation.AccessValidator accessValidator;
+
     private PostServiceImpl postService;
 
     private Post testPost;
@@ -51,6 +54,15 @@ class PostServiceTest {
 
     @BeforeEach
     void setUp() {
+        postService = new PostServiceImpl(
+                postRepository,
+                userRepository,
+                postMapper,
+                accessValidator,
+                apiUtils,
+                Optional.of(kafkaMessageService)
+        );
+
         testUser = new User();
         testUser.setId(1);
         testUser.setUsername("TestUser");

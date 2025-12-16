@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +40,7 @@ public class PostServiceImpl implements PostService {
     private final PostMapper postMapper;
     private final AccessValidator accessValidator;
     private final APIUtils apiUtils;
-    private final KafkaMessageService kafkaMessageService;
+    private final Optional<KafkaMessageService> kafkaMessageService;
 
     @Override
     @Transactional(readOnly = true)
@@ -61,7 +62,8 @@ public class PostServiceImpl implements PostService {
 
         Post post = postMapper.createPost(postRequest, user, user.getUsername());
         post = postRepository.save(post);
-        kafkaMessageService.sendPostCreatedMessage(user.getId(), post.getId());
+        Post finalPost = post;
+        kafkaMessageService.ifPresent(service -> service.sendPostCreatedMessage(user.getId(), finalPost.getId()));
 
 
         return IamResponse.createSuccessful(postMapper.toPostDTO(post));
@@ -80,7 +82,8 @@ public class PostServiceImpl implements PostService {
         }
         postMapper.updatePost(post, request);
         post = postRepository.save(post);
-        kafkaMessageService.sendPostUpdatedMessage(post.getUser().getId(), post.getId());
+        Post finalPost = post;
+        kafkaMessageService.ifPresent(service -> service.sendPostUpdatedMessage(finalPost.getUser().getId(), finalPost.getId()));
 
         return IamResponse.createSuccessful(postMapper.toPostDTO(post));
     }
@@ -93,7 +96,8 @@ public class PostServiceImpl implements PostService {
         accessValidator.validateAdminOrOwnerAccess(post.getUser().getId());
         post.setDeleted(true);
         postRepository.save(post);
-        kafkaMessageService.sendPostDeletedMessage(post.getUser().getId(), postId);
+        Post finalPost = post;
+        kafkaMessageService.ifPresent(service -> service.sendPostDeletedMessage(finalPost.getUser().getId(), postId));
 
     }
 
